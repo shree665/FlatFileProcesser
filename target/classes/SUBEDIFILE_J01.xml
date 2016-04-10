@@ -50,7 +50,7 @@
 		<!-- Retrieves valid files by category, status and type in the denoted directory. Checks that the file is valid and adds .gz to compressed files. Copies file to destination file. -->
         <batch:step id="copyNewUploadedFiles" next="moveFailedFilesToStaging">
         	<batch:tasklet>
-        		<bean class="gov.ed.fsa.ccm_analytics.tasklet.FlatFileCopyTasklet" scope="step">
+        		<bean class="subedi.flatfile.tasklet.FlatFileCopyTasklet" scope="step">
         			<property name="uploadedFileRecordCategory" value="#{jobParameters['FILE.CATAGORY']}"/>
         			<property name="uploadedFileRecordStatus" value="#{jobParameters['FILE.STATUS']}"/>
         			<property name="uploadedFileRecordType" value="#{jobParameters['FILE.TYPE']}"/>
@@ -61,7 +61,7 @@
     	<!--     Moves failed files to staging through integrity checking. -->
         <batch:step id="moveFailedFilesToStaging" next="readMultipleFileMaster">
         	<batch:tasklet>
-        		<bean class="gov.ed.fsa.ccm_analytics.tasklet.MoveFailedFilesTasklet" scope="step">
+        		<bean class="subedi.flatfile.tasklet.MoveFailedFilesTasklet" scope="step">
         			<property name="processFailedFiles" value="#{jobParameters['PROCESS.FAILED']}"/> 
         			<property name="databaseCode" value="#{jobParameters['DATABASE.CODE']}"/>
         		</bean>
@@ -84,7 +84,7 @@
 	<!-- Decider Bean -->
 	<bean id="moreFileDeciderBean" class="subedi.flatfile.processer.FlatFileDecider"/>
 	
-	<bean id="icmPartitioner" class="gov.ed.fsa.ccm_analytics.processor.FlatFilePartitioner" scope="step">
+	<bean id="icmPartitioner" class="subedi.flatfile.processor.FlatFilePartitioner" scope="step">
 	    <description>Creates a new DocTxn and FileTxn from the files ready to be processed. Splits the job into multiple threads.</description>
 		<property name="jobName" value="#{jobParameters['JOB.NAME']}"/>
 		<property name="databaseCode" value="#{jobParameters['DATABASE.CODE']}"/>
@@ -115,7 +115,7 @@
 		</batch:listeners>
 	</batch:step>
 	
-	<bean id="moveListener" class="gov.ed.fsa.ccm_analytics.listener.FlatFileMoveListener" scope="step">
+	<bean id="moveListener" class="subedi.flatfile.listener.FlatFileMoveListener" scope="step">
 	    <description>
 	    	Moves a file from staging to working, and then updates the path in StepExecution context and FileTxn
 	        After the step it moves the files to archive location after they have been processed.
@@ -131,7 +131,7 @@
 		<property name="resource" value="#{stepExecutionContext['FILE.NAME']}"/>
 		<property name="strict" value="true"/>
 		<property name="bufferedReaderFactory">
-			<bean class="gov.ed.fsa.ccm_analytics.reader.GzipBufferedReaderFactory"/>
+			<bean class="subedi.flatfile.reader.GzipBufferedReaderFactory"/>
 		</property>
 		<property name="recordSeparatorPolicy">
 			<bean class="org.springframework.batch.item.file.separator.DefaultRecordSeparatorPolicy"/>
@@ -145,7 +145,7 @@
 					</bean>
 				</property>
 				<property name="fieldSetMapper">
-					<bean class="gov.ed.fsa.ccm_analytics.util.FlatFileMapper">
+					<bean class="subedi.flatfile.util.FlatFileMapper">
 						<property name="jobControlId" value="#{stepExecutionContext['JOB.CONTROL']}"/>
 					</bean>
 				</property>
@@ -154,7 +154,7 @@
 	</bean>
 	
 	<!--DB2 database Writer -->
-	 <bean id="icmDatabaseWriter" class="gov.ed.fsa.ccm_analytics.writer.IcmWriter" scope="step">
+	 <bean id="icmDatabaseWriter" class="subedi.flatfile.writer.IcmWriter" scope="step">
 	    <description>Processes the list of CCMContainers from each file and writes to database.</description>
     	<property name="dataSource" ref="rdsDataSource"/>
     	<property name="columnNames" value="#{stepExecutionContext['FILE.COLUMN.NAMES']}"/>
@@ -163,7 +163,7 @@
     	<property name="mappingName" value="#{jobParameters['MAPPING.NAME']}"/>
     	<property name="itemSqlParameterSourceProvider">
     	<!-- Sql source provider for the auto-generated sql -->
-    		<bean class="gov.ed.fsa.ccm_analytics.writer.IcmSqlParameterSourceProvider">
+    		<bean class="subedi.flatfile.writer.IcmSqlParameterSourceProvider">
     			<property name="mappingName" value="#{jobParameters['MAPPING.NAME']}"/>
     		</bean>
     	</property>
@@ -181,9 +181,5 @@
         </bean>
       </property>
     </bean>
-    
-	<!-- <bean id="batchJobLaunch" class="com.accenture.batch.support.domain.BatchJobLaunch">
-		<property name="jobLaunchName" value="CCMICMETLED_J01"/>
-	</bean> -->
 
 </beans>
