@@ -62,7 +62,7 @@ public class FlatFileUtil {
 	public static final String WORKING_FOLDER_PATH = "CCM_WORKING_FOLDER_PATH";
 	public static final String ARCHIVE_FOLDER_PATH = "CCM_ARCHIVE_FOLDER_PATH";
 	
-	//LOCAL TESTING VALUES
+	//LOCAL TESTING VALUES (we should put these values in database and retrieve it from database)
 	public static final String STAGING_PATH = "/apps/batch/staging/ccm_analytics/";
 	public static final String WORKING_PATH = "/apps/batch/working/ccm_analytics/";
 	public static final String ARCHIVE_PATH = "/apps/batch/archive/ccm_analytics/";

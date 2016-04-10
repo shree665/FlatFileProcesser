@@ -1,7 +1,189 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-
+	xmlns:oxm="http://www.springframework.org/schema/oxm" xmlns:batch="http://www.springframework.org/schema/batch"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/oxm http://www.springframework.org/schema/oxm/spring-oxm.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd">
+		
+	
+	<batch:job id="SUBEDIFILE_J01">
+	
+		<!-- Job Paramter Validation -->
+		<batch:validator>
+	          <bean class="org.springframework.batch.core.job.DefaultJobParametersValidator">
+                <property name="requiredKeys">
+	                <util:list>
+	                <!-- Delimiter character used in file -->
+	                	<value>DELIMITER.CHARACTER</value>
+	                <!-- Commit interval to commit sql query in batch -->
+	                	<value>COMMIT.INTERVAL</value>
+	                <!-- Encoding of flat file that we receive to read -->
+	                	<value>FILE.ENCODING</value>
+	                <!-- Job name -->
+	                	<value>JOB.NAME</value>
+	                <!-- Code of the data source of the file i.e. ICM or NICE -->
+	                	<value>DATABASE.CODE</value>
+	                <!-- The database name that the data retrieve from i.e. ICM or NICE -->
+	                	<value>FILE.CATAGORY</value>
+	                <!-- Status of the file in the server. Either it is uploaded or processed or failed.
+	                  We just use uploaded string to read only uploaded file-->
+	                	<value>FILE.STATUS</value>
+	                <!-- Type of the file which means the owner of the file. We use telephony_analytics  -->
+	                	<value>FILE.TYPE</value>
+	                <!-- Mapping name of the database i.e. ICM or NICE -->
+	                	<value>MAPPING.NAME</value>
+	                <!-- Processing failed file or not (boolean) -->
+	                	<value>PROCESS.FAILED</value>
+	                <!-- Max run count for the job -->
+	                	<value>MAX.RUN.COUNT</value>
+	                </util:list>
+                </property>
+	          </bean>
+         </batch:validator>
+        
+		<!-- Retrieves valid files by category, status and type in the denoted directory. Checks that the file is valid and adds .gz to compressed files. Copies file to destination file. -->
+        <batch:step id="copyNewUploadedFiles" next="moveFailedFilesToStaging">
+        	<batch:tasklet>
+        		<bean class="gov.ed.fsa.ccm_analytics.tasklet.FlatFileCopyTasklet" scope="step">
+        			<property name="uploadedFileRecordCategory" value="#{jobParameters['FILE.CATAGORY']}"/>
+        			<property name="uploadedFileRecordStatus" value="#{jobParameters['FILE.STATUS']}"/>
+        			<property name="uploadedFileRecordType" value="#{jobParameters['FILE.TYPE']}"/>
+        		</bean>
+        	</batch:tasklet>
+        </batch:step>
+        
+    	<!--     Moves failed files to staging through integrity checking. -->
+        <batch:step id="moveFailedFilesToStaging" next="readMultipleFileMaster">
+        	<batch:tasklet>
+        		<bean class="gov.ed.fsa.ccm_analytics.tasklet.MoveFailedFilesTasklet" scope="step">
+        			<property name="processFailedFiles" value="#{jobParameters['PROCESS.FAILED']}"/> 
+        			<property name="databaseCode" value="#{jobParameters['DATABASE.CODE']}"/>
+        		</bean>
+        	</batch:tasklet>
+        </batch:step>
+        
+        <!-- Master step to partion the files using icmPartitioner and icmHandler and sends each file to readEachFile bean -->
+		<batch:step id="readMultipleFileMaster" next="moreFilesDecider">
+			<batch:partition step="readEachFile" partitioner="icmPartitioner" handler="icmHandler"/>
+		</batch:step>
+		
+		<!-- Checks if there are more files to process. -->
+		<batch:decision id="moreFilesDecider" decider="moreFileDeciderBean">
+			<batch:next on="MORE_FILES_TO_PROCESS" to="readMultipleFileMaster"/>
+			<batch:end on="MAX_RUNS_HIT"/>
+			<batch:end on="NO_MORE_FILES_TO_PROCESS"/>
+		</batch:decision>
+	</batch:job>
+	
+	<!-- Decider Bean -->
+	<bean id="moreFileDeciderBean" class="subedi.flatfile.processer.FlatFileDecider"/>
+	
+	<bean id="icmPartitioner" class="gov.ed.fsa.ccm_analytics.processor.FlatFilePartitioner" scope="step">
+	    <description>Creates a new DocTxn and FileTxn from the files ready to be processed. Splits the job into multiple threads.</description>
+		<property name="jobName" value="#{jobParameters['JOB.NAME']}"/>
+		<property name="databaseCode" value="#{jobParameters['DATABASE.CODE']}"/>
+		<property name="docType" value="#{T(gov.ed.fsa.common.enumeration.CodDocTxnDocType).TELEPHONY_ANALYTICS}"/>
+		<property name="fileType" value="#{T(gov.ed.fsa.common.enumeration.CodFileTxnFileType).ICM}"/>
+		<property name="encoding" value="#{jobParameters['FILE.ENCODING']}"/>
+		<property name="delimiterCharacter" value="#{jobParameters['DELIMITER.CHARACTER']}"/>
+		<property name="mappingName" value="#{jobParameters['MAPPING.NAME']}"/>
+	</bean>
+	
+	<!-- Handler Bean -->	
+	<bean id="icmHandler" class="org.springframework.batch.core.partition.support.TaskExecutorPartitionHandler" scope="step">
+	    <description>Handler that starts up the threads for execution in the partitioner.</description>
+		<property name="taskExecutor" ref="syncTaskExecutor" />
+		<property name="step" ref="readEachFile" />
+	</bean>
+	
+	<!-- Task Executor -->	
+	<bean id="syncTaskExecutor" class="org.springframework.core.task.SyncTaskExecutor" scope="step" />	
+	
+	<!-- Main Reader and Writer for CCM Files -->
+	<batch:step id="readEachFile" xmlns="http://www.springframework.org/schema/batch">
+		<batch:tasklet transaction-manager="rdsTransactionManager">
+			<batch:chunk reader="icmFlatFileReader" writer="icmDatabaseWriter" commit-interval="#{jobParameters['COMMIT.INTERVAL']}"/>
+		</batch:tasklet>
+		<batch:listeners>
+			<batch:listener ref="moveListener"/>
+		</batch:listeners>
+	</batch:step>
+	
+	<bean id="moveListener" class="gov.ed.fsa.ccm_analytics.listener.FlatFileMoveListener" scope="step">
+	    <description>
+	    	Moves a file from staging to working, and then updates the path in StepExecution context and FileTxn
+	        After the step it moves the files to archive location after they have been processed.
+	    </description>
+		<property name="fileType" value="#{jobParameters['FILE.TYPE']}"/>
+	</bean>
+	
+	<!-- Flat file Reader. Reads each file  -->
+	<bean id="icmFlatFileReader" class="org.springframework.batch.item.file.FlatFileItemReader" scope="step">
+	    <description>Reads in the files from working and converts to CCMContainer for mapping.</description>
+		<property name="linesToSkip" value="1"/>
+		<property name="encoding" value="#{jobParameters['FILE.ENCODING']}"/>
+		<property name="resource" value="#{stepExecutionContext['FILE.NAME']}"/>
+		<property name="strict" value="true"/>
+		<property name="bufferedReaderFactory">
+			<bean class="gov.ed.fsa.ccm_analytics.reader.GzipBufferedReaderFactory"/>
+		</property>
+		<property name="recordSeparatorPolicy">
+			<bean class="org.springframework.batch.item.file.separator.DefaultRecordSeparatorPolicy"/>
+		</property>
+		<property name="lineMapper">
+			<bean class="org.springframework.batch.item.file.mapping.DefaultLineMapper">
+				<property name="lineTokenizer">
+					<bean class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer">
+						<property name="delimiter" value="#{jobParameters['DELIMITER.CHARACTER']}"/>
+						<property name="names" value="#{stepExecutionContext['FILE.COLUMN.NAMES']}"/>
+					</bean>
+				</property>
+				<property name="fieldSetMapper">
+					<bean class="gov.ed.fsa.ccm_analytics.util.FlatFileMapper">
+						<property name="jobControlId" value="#{stepExecutionContext['JOB.CONTROL']}"/>
+					</bean>
+				</property>
+			</bean>
+		</property>
+	</bean>
+	
+	<!--DB2 database Writer -->
+	 <bean id="icmDatabaseWriter" class="gov.ed.fsa.ccm_analytics.writer.IcmWriter" scope="step">
+	    <description>Processes the list of CCMContainers from each file and writes to database.</description>
+    	<property name="dataSource" ref="rdsDataSource"/>
+    	<property name="columnNames" value="#{stepExecutionContext['FILE.COLUMN.NAMES']}"/>
+    	<property name="jobControl" value="#{stepExecutionContext['JOB.CONTROL']}"/>
+    	<property name="behaviorCode" value="#{stepExecutionContext['BEHAVIOR']}"/>
+    	<property name="mappingName" value="#{jobParameters['MAPPING.NAME']}"/>
+    	<property name="itemSqlParameterSourceProvider">
+    	<!-- Sql source provider for the auto-generated sql -->
+    		<bean class="gov.ed.fsa.ccm_analytics.writer.IcmSqlParameterSourceProvider">
+    			<property name="mappingName" value="#{jobParameters['MAPPING.NAME']}"/>
+    		</bean>
+    	</property>
+    </bean>
+    
+     <!-- Always increment VERSION in BATCH_JOB_LAUNCH, even if job fails -->
+    <bean id="propertyOverrideConfigurer" class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
+      <property name="properties">
+        <bean class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+          <property name="properties">
+            <props>
+              <prop key="incrementingJobListener.alwaysIncrementVersion">true</prop>
+            </props>
+          </property>
+        </bean>
+      </property>
+    </bean>
+    
+	<!-- <bean id="batchJobLaunch" class="com.accenture.batch.support.domain.BatchJobLaunch">
+		<property name="jobLaunchName" value="CCMICMETLED_J01"/>
+	</bean> -->
 
 </beans>
