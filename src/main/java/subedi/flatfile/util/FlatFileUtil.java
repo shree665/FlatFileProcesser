@@ -27,6 +27,7 @@ import org.springframework.util.Assert;
  */
 
 public class FlatFileUtil {
+	
 	private static Logger logger = LoggerFactory.getLogger(FlatFileUtil.class);
 	
 	//Cisco Constants
@@ -286,13 +287,13 @@ public class FlatFileUtil {
 	}
 
 	public static String archive(final File sourceFile, final File destinationRoot, final String category,
-			final boolean deleteAfterArchive, final FileSystemUtilService fileSystemUtilService) {
+			final boolean deleteAfterArchive) {
 		String archiveFilePath = null;
 
 		if (sourceFile.getName().endsWith(FlatFileUtil.GZIP_FILE_END_SUFFIX)) {
 			archiveFilePath = noCompressionArchive(sourceFile, destinationRoot, category, deleteAfterArchive);
 		} else {
-			archiveFilePath = fileSystemUtilService.archive(sourceFile.getPath(), destinationRoot.getPath(), category, deleteAfterArchive);
+			archiveFilePath = compressArchive(sourceFile.getPath(), destinationRoot.getPath(), category, deleteAfterArchive);
 		}
 
 		//Force delete
@@ -301,6 +302,11 @@ public class FlatFileUtil {
 		}
 
 		return archiveFilePath;
+	}
+
+	private static String compressArchive(String sourcePath, String destinationPath, String category, boolean deleteAfterArchive) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	private static String noCompressionArchive(File sourceFile, File destRootDir, String docTypeSubDirName, boolean deleteSource) {

@@ -8,7 +8,7 @@ import java.sql.Types;
  *
  */
 
-public enum DbColumnTypeEnum {
+public enum OracleColumnTypeEnum {
 
 	INTEGER(Types.INTEGER),
 	NUMBER(Types.NUMERIC),
@@ -34,7 +34,7 @@ public enum DbColumnTypeEnum {
 	
 	private Integer sqlType;
 	
-	DbColumnTypeEnum(Integer sqlType) {
+	OracleColumnTypeEnum(Integer sqlType) {
 		this.sqlType = sqlType;
 	}
 	
