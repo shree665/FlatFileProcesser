@@ -84,7 +84,7 @@
 	<!-- Decider Bean -->
 	<bean id="moreFileDeciderBean" class="subedi.flatfile.processer.FlatFileDecider"/>
 	
-	<bean id="icmPartitioner" class="subedi.flatfile.processor.FlatFilePartitioner" scope="step">
+	<bean id="icmPartitioner" class="subedi.flatfile.processer.FlatFilePartitioner" scope="step">
 	    <description>Creates a new DocTxn and FileTxn from the files ready to be processed. Splits the job into multiple threads.</description>
 		<property name="jobName" value="#{jobParameters['JOB.NAME']}"/>
 		<property name="databaseCode" value="#{jobParameters['DATABASE.CODE']}"/>

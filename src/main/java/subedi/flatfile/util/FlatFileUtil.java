@@ -1,7 +1,13 @@
 package subedi.flatfile.util;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -11,6 +17,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
@@ -39,6 +46,8 @@ public class FlatFileUtil {
 	private static final String MONTH = "$MONTH";
 	private static final String DAY = "$DAY";
 	
+	protected static final int BUFFER_SIZE = 2048;
+	
 	// Time stamp format for ICM
 	public static final DateTimeFormatter ICM_FILE_TIMESTAMP_FORMAT = DateTimeFormat.forPattern("YYYY-MM-dd HH:mm:ss");
 	public static final DateTimeFormatter ICM_FILE_TIMESTAMP_FORMAT_WITH_MILLISECOND = DateTimeFormat.forPattern("YYYY-MM-dd HH:mm:ss.SS");
@@ -56,16 +65,11 @@ public class FlatFileUtil {
 	public static final String NICE_FILE_PREFIX_FORMAT_REGEX = "^nice(\\w+\\.+\\w+)";
 	public static final String ICM_FILE_PREFIX_FORMAT_REGEX = "^inst(\\w+\\.+\\w+)";
 	public static final DateTimeFormatter FLAT_FILE_TIMESTAMP_FORMAT = DateTimeFormat.forPattern("YYYYMMdd.HHmmss.SSSSSSS");
-
-	//Server paths
-	public static final String STAGING_FOLDER_PATH = "CCM_STAGING_FOLDER_PATH";
-	public static final String WORKING_FOLDER_PATH = "CCM_WORKING_FOLDER_PATH";
-	public static final String ARCHIVE_FOLDER_PATH = "CCM_ARCHIVE_FOLDER_PATH";
 	
 	//LOCAL TESTING VALUES (we should put these values in database and retrieve it from database)
-	public static final String STAGING_PATH = "/apps/batch/staging/ccm_analytics/";
-	public static final String WORKING_PATH = "/apps/batch/working/ccm_analytics/";
-	public static final String ARCHIVE_PATH = "/apps/batch/archive/ccm_analytics/";
+	public static final String STAGING_PATH = "/apps/batch/staging/test/";
+	public static final String WORKING_PATH = "/apps/batch/working/test/";
+	public static final String ARCHIVE_PATH = "/apps/batch/archive/test/";
 
 	// Keys
 	public static final String JOB_CONTROL_KEY = "JOB.CONTROL";
@@ -74,8 +78,6 @@ public class FlatFileUtil {
 	public static final String JOB_END_TIME_KEY = "JOB.END.TIME";
 	public static final String BEHAVIOR_KEY = "BEHAVIOR";
 	public static final String FILE_NAME_KEY = "FILE.NAME";
-	public static final String DOC_TXN_ID = "DOC.TXN.ID";
-	public static final String FILE_TXN_ID = "FILE.TXN.ID";
 	public static final String FILE_UPLOAD_ID = "FILE.UPLOAD.ID";
 	public static final String MAPPING_NAME_KEY = "MAPPING.NAME";
 	public static final String TABLE_ALIAS_1_KEY = "TBL_ALIAS_1";
@@ -90,7 +92,7 @@ public class FlatFileUtil {
 	public static final String YES_GZIP_FLG = "Y";
 	public static final String NO_GZIP_FLG = "N";
 	public static final String GZIP_FILE_END_SUFFIX = ".gz";
-	public static final String MAINT_APP = "ANALYTICS";
+	public static final String MAINT_APP = "SUBEDI_TEST";
 	
 	public static String getStackTrace(final Throwable throwable) {
 		final StringWriter sw = new StringWriter();
@@ -304,9 +306,108 @@ public class FlatFileUtil {
 		return archiveFilePath;
 	}
 
-	private static String compressArchive(String sourcePath, String destinationPath, String category, boolean deleteAfterArchive) {
-		// TODO Auto-generated method stub
-		return null;
+	private static String compressArchive(String sourceFilePath, String destRootDirPath, String docTypeSubDirName, boolean deleteSource) {
+		final String newDestRootDirPath = replacePlaceholderValues(destRootDirPath);
+		logger.info("archiving from [{}] to [{}]", sourceFilePath, newDestRootDirPath);
+		
+		File sourceFile = new File(sourceFilePath);
+		File destRootDir = new File(newDestRootDirPath);
+		
+		try {
+			Assert.isTrue(sourceFile.exists() && sourceFile.isFile(), "source file [" + sourceFile.getCanonicalPath()
+					+ "] does not exist or is not a file");
+
+			String archiveFilePath = null;
+			if (!destRootDir.exists() && destRootDir.mkdirs()) {
+				logger.debug("Creating new directory: {}", destRootDir);
+			}
+
+			// Checking directory was created and we are able to write to it
+			if (!destRootDir.exists() || !destRootDir.canWrite()) {
+				logger.warn("Unable to create directory or Unable to wiite to directory : {}", destRootDir.getCanonicalPath());
+				return archiveFilePath;
+			}
+
+			File archiveDir = destRootDir;
+
+			if (docTypeSubDirName != null) {
+				archiveDir = new File(archiveDir, docTypeSubDirName);
+				archiveDir.mkdirs();
+			}
+
+			final String gzippedFileName = sourceFile.getName() + ".gz";
+			final File gzippedArchiveFile = new File(archiveDir, gzippedFileName);
+
+			if (gzip(sourceFile, gzippedArchiveFile)) {
+				logger.debug("archived from [" + sourceFile.getCanonicalPath() + "] to [" + gzippedArchiveFile.getCanonicalPath() + "]");
+				archiveFilePath = gzippedArchiveFile.getCanonicalPath();
+			} else {
+				logger.error("failed to archive from [" + sourceFile.getCanonicalPath() + "] to [" + gzippedArchiveFile.getCanonicalPath()
+						+ "]");
+			}
+
+			if (deleteSource) {
+				sourceFile.delete();
+			}
+
+			return archiveFilePath;
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
+		
+	}
+	
+	public static boolean gzip(final File sourceFile, final File archiveFile) {
+		return gzip(sourceFile, archiveFile, false);
+	}
+	
+	public static boolean gzip(final File sourceFile, final File archiveFile, final boolean throwsException) {
+		final byte inputData[] = new byte[BUFFER_SIZE];
+		int inputCount = 0;
+
+		InputStream unzippedFileInputStream = null;
+		OutputStream gzipOutputStream = null;
+		try {
+			unzippedFileInputStream = new BufferedInputStream(new FileInputStream(sourceFile), BUFFER_SIZE);
+			gzipOutputStream = new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(archiveFile)));
+			while ((inputCount = unzippedFileInputStream.read(inputData, 0, BUFFER_SIZE)) != -1) {
+				gzipOutputStream.write(inputData, 0, inputCount);
+			}
+			gzipOutputStream.flush();
+			return true;
+		} catch (final IOException e) {
+			logger.error("Could not gzip file: " + sourceFile.getAbsolutePath());
+			if (throwsException) {
+				throw new IllegalStateException("Could not zip file!", e);
+			}
+			return false;
+		} finally {
+			try {
+				gzipOutputStream.close();
+			} catch (final Throwable e) {
+				// ignore all throwables
+			}
+			try {
+				unzippedFileInputStream.close();
+			} catch (final Throwable e) {
+				// ignore all throwables
+			}
+		}
+	}
+
+
+	private static String replacePlaceholderValues(String archiveRootDir) {
+		final Calendar calendar = Calendar.getInstance();
+		final int year = calendar.get(Calendar.YEAR);
+		archiveRootDir = archiveRootDir.replace(YEAR, String.valueOf(year));
+
+		final int month = calendar.get(Calendar.MONTH) + 1; // month is zero-based
+		archiveRootDir = archiveRootDir.replace(MONTH, String.format("%02d", month));
+
+		final int date = calendar.get(Calendar.DATE);
+		archiveRootDir = archiveRootDir.replace(DAY, String.format("%02d", date));
+
+		return archiveRootDir;
 	}
 
 	private static String noCompressionArchive(File sourceFile, File destRootDir, String docTypeSubDirName, boolean deleteSource) {
