@@ -88,8 +88,7 @@
 	    <description>Creates a new DocTxn and FileTxn from the files ready to be processed. Splits the job into multiple threads.</description>
 		<property name="jobName" value="#{jobParameters['JOB.NAME']}"/>
 		<property name="databaseCode" value="#{jobParameters['DATABASE.CODE']}"/>
-		<property name="docType" value="#{T(gov.ed.fsa.common.enumeration.CodDocTxnDocType).TELEPHONY_ANALYTICS}"/>
-		<property name="fileType" value="#{T(gov.ed.fsa.common.enumeration.CodFileTxnFileType).ICM}"/>
+		<property name="fileType" value="ICM"/>
 		<property name="encoding" value="#{jobParameters['FILE.ENCODING']}"/>
 		<property name="delimiterCharacter" value="#{jobParameters['DELIMITER.CHARACTER']}"/>
 		<property name="mappingName" value="#{jobParameters['MAPPING.NAME']}"/>

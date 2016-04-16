@@ -61,5 +61,4 @@ public class FlatFileDecider implements JobExecutionDecider {
 			return new FlowExecutionStatus("NO_MORE_FILES_TO_PROCESS");
 		}
 	}
-
 }

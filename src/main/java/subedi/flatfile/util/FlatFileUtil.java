@@ -82,7 +82,10 @@ public class FlatFileUtil {
 	public static final String MAPPING_NAME_KEY = "MAPPING.NAME";
 	public static final String TABLE_ALIAS_1_KEY = "TBL_ALIAS_1";
 	public static final String TABLE_ALIAS_2_KEY = "TBL_ALIAS_2";
-	public static final String 	DATABASECODE_KEY = "DATABASE.CODE";
+	public static final String DATABASECODE_KEY = "DATABASE.CODE";
+	public static final String STAGING_PATH_KEY = "STAGING.PATH";
+	public static final String WORKING_PATH_KEY = "WORKING.PATH";
+	public static final String ARCHIVE_PATH_KEY = "ARCHIVE.PATH";
 	public static final String DOT = ".";
 	public static final String FILE_PREFIX = "file:";
 	public static final String BACKWARD_SLASH = "\\";

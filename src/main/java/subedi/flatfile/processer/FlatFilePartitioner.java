@@ -50,6 +50,7 @@ public class FlatFilePartitioner implements Partitioner {
 	private String encoding;
 	private String delimiterCharacter;
 	private String mappingName;
+	private String fileType;
 
 	public static final String UTF8_BOM = "\uFEFF";
 
@@ -134,7 +135,7 @@ public class FlatFilePartitioner implements Partitioner {
 					if(!in.ready() || StringUtils.isBlank(in.readLine())) {
 						logger.info("No data to process for file: ["+file.getPath()+"], it will be archived.");
 
-						final String archiveFilePath = FlatFileUtil.archive(file, new File(archiveFolderPath), "ICM", true);
+						final String archiveFilePath = FlatFileUtil.archive(file, new File(archiveFolderPath), fileType, true);
 						logger.info("File archived to ["+archiveFilePath+"]");
 
 						in.close();
@@ -158,6 +159,7 @@ public class FlatFilePartitioner implements Partitioner {
 				context.put(FlatFileUtil.JOB_CONTROL_KEY, jobControl.getJobControlId());
 				context.put(FlatFileUtil.MAPPING_NAME_KEY, mappingName);
 				context.put(FlatFileUtil.DATABASECODE_KEY, databaseCode);
+				context.put(FlatFileUtil.FILE_NAME_KEY, file.getAbsolutePath());
 
 				logger.info("Located file to process:"
 						+ "\n\tFile: ["+file.getPath()+"]"
@@ -317,5 +319,9 @@ public class FlatFilePartitioner implements Partitioner {
 
 	public void setMappingName(final String mappingName) {
 		this.mappingName = mappingName;
+	}
+
+	public void setFileType(String fileType) {
+		this.fileType = fileType;
 	}
 }
