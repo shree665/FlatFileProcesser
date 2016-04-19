@@ -153,7 +153,7 @@
 	</bean>
 	
 	<!--DB2 database Writer -->
-	 <bean id="icmDatabaseWriter" class="subedi.flatfile.writer.IcmWriter" scope="step">
+	 <bean id="icmDatabaseWriter" class="subedi.flatfile.writer.CustomFlatFileWriter" scope="step">
 	    <description>Processes the list of CCMContainers from each file and writes to database.</description>
     	<property name="dataSource" ref="rdsDataSource"/>
     	<property name="columnNames" value="#{stepExecutionContext['FILE.COLUMN.NAMES']}"/>
@@ -162,7 +162,7 @@
     	<property name="mappingName" value="#{jobParameters['MAPPING.NAME']}"/>
     	<property name="itemSqlParameterSourceProvider">
     	<!-- Sql source provider for the auto-generated sql -->
-    		<bean class="subedi.flatfile.writer.IcmSqlParameterSourceProvider">
+    		<bean class="subedi.flatfile.writer.CustomSqlParameterSourceProvider">
     			<property name="mappingName" value="#{jobParameters['MAPPING.NAME']}"/>
     		</bean>
     	</property>

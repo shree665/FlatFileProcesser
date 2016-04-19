@@ -26,7 +26,7 @@ import subedi.flatfile.util.FlatFileUtil;
  * @author vivek.subedi
  *
  */
-public class IcmWriter extends JdbcBatchItemWriter<DataContainer> implements InitializingBean{
+public class CustomFlatFileWriter extends JdbcBatchItemWriter<DataContainer> implements InitializingBean{
 
 	@Value("${batch.oracle.rds.schema}")
 	private String schema;

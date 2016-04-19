@@ -18,9 +18,9 @@ import org.slf4j.LoggerFactory;
  * @author vivek.subedi
  *
  */
-public class ICMOracleCaster {
+public class OracleCaster {
 
-	private static Logger logger = LoggerFactory.getLogger(ICMOracleCaster.class);
+	private static Logger logger = LoggerFactory.getLogger(OracleCaster.class);
 
 	/**
 	 * This method casts any given value using sqlType of DB2 column and returns the casted value

@@ -32,6 +32,7 @@ public class FlatFileMoveListener implements StepExecutionListener {
 	@Override
 	public ExitStatus afterStep(final StepExecution stepExecution) {
 		
+		//need to get folder path from database so that easy to update if necessary
 		String archiveFolderPath = FlatFileUtil.ARCHIVE_PATH;
 		
 		if (ExitStatus.COMPLETED.equals(stepExecution.getExitStatus())) {

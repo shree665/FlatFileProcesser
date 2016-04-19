@@ -24,14 +24,14 @@ import subedi.flatfile.persistence.enumerated.OracleColumnTypeEnum;
 import subedi.flatfile.service.OracleSystemColumnService;
 import subedi.flatfile.service.RefDataService;
 import subedi.flatfile.util.FlatFileUtil;
-import subedi.flatfile.util.ICMOracleCaster;
+import subedi.flatfile.util.OracleCaster;
 
 /**
  * provides values of an item to the SQL at runtime.
  *
  * @author vivek.subedi
  */
-public class IcmSqlParameterSourceProvider implements ItemSqlParameterSourceProvider<DataContainer> {
+public class CustomSqlParameterSourceProvider implements ItemSqlParameterSourceProvider<DataContainer> {
 	
 	@Value("${batch.oracle.rds.schema}")
 	private String schema;
@@ -139,7 +139,7 @@ public class IcmSqlParameterSourceProvider implements ItemSqlParameterSourceProv
 		for (Entry<String, String> entry : item.getCcmData().entrySet()) {
 			Integer columnTypeCode = db2ColumnType.get(columnMap.get(entry.getKey()));
 			if (db2ColumnType != null) {
-				Object ccmValue =ICMOracleCaster.castCCMValue(entry.getValue(), columnTypeCode, db2ColumnLength.get(columnMap.get(entry.getKey())), columnMap.get(entry.getKey()));
+				Object ccmValue =OracleCaster.castCCMValue(entry.getValue(), columnTypeCode, db2ColumnLength.get(columnMap.get(entry.getKey())), columnMap.get(entry.getKey()));
 				SqlParameterValue sqlParameterValue = new SqlParameterValue(columnTypeCode.intValue(), ccmValue);
 				paramaterMap.put(entry.getKey().toLowerCase(), sqlParameterValue);
 			}
