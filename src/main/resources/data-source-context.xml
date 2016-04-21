@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop 
+		http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/tx 
+		http://www.springframework.org/schema/tx/spring-tx.xsd">
+ 	
+  <bean name="dataSource" class="org.apache.commons.dbcp.BasicDataSource" >
+       <property name="driverClassName" value="${batch.oracle.rds.driver}" />
+       <property name="url" value="${batch.oracle.rds.url}" />
+       <property name="environment" value="${batch.basedir.environment}" />
+       <property name="maxActive" value="${batch.oracle.rds.max.active.connections}" />
+       <property name="maxIdle" value="${batch.oracle.rds.max.idle.connections}" /> 
+       <property name="accessToUnderlyingConnectionAllowed" value="true"/>
+       <property name="validationQuery" value="select 1 from dual" />
+	   <property name="timeBetweenEvictionRunsMillis" value="${batch.max.time.between.eviction.runs.millis}" />
+	   <property name="minEvictableIdleTimeMillis" value="${batch.max.time.between.eviction.runs.millis}" />
+	   <property name="minIdle" value="0" />
+	   <property name="testWhileIdle" value="true" />
+	   <property name="devUsername" value="${batch.oracle.rds.jdbc.dev.user}" />
+	   <property name="devPassword" value="${batch.oracle.rds.jdbc.dev.password}" />
+       <property name="poolPreparedStatements" value="${batch.oracle.rds.pool.prepared.statements}" />              
+    </bean>
+    
+     <bean name="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager" lazy-init="true">
+  		<property name="dataSource" ref="dataSource" /> 
+ 	</bean>
+ 	
+ 	<!-- Oracle TDS data source (formerly DB2 Core -->
+    <bean id="dataSource2" class="org.apache.commons.dbcp.BasicDataSource" > <!-- gov.ed.fsa.common.security.CommonBasicDataSource -->
+       <property name="driverClassName" value="${batch.oracle.tds.driver}" />
+       <property name="url" value="${batch.oracle.tds.url}" />
+       <property name="environment" value="${batch.basedir.environment}" />
+	   <property name="devUsername" value="${batch.oracle.tds.jdbc.dev.user}" />
+	   <property name="devPassword" value="${batch.oracle.tds.jdbc.dev.password}" />
+       <property name="poolPreparedStatements" value="${batch.oracle.tds.pool.prepared.statements}" />
+       <property name="maxActive" value="${batch.oracle.tds.max.active.connections}" />
+       <property name="maxIdle" value="${batch.oracle.tds.max.idle.connections}" />                 
+    </bean>
+    
+     <bean name="transactionManager2" class="org.springframework.jdbc.datasource.DataSourceTransactionManager" lazy-init="true">
+  		<property name="dataSource" ref="dataSource2" />
+ 	</bean>
+ 	
+ 	<!-- This tells Spring to activate annotation-driven transactions -->
+    <tx:annotation-driven transaction-manager="transactionManager2" />
+ 	  
+</beans>

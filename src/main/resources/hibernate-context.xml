@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+			
+	<!-- Used for common code, such as config item -->
+
+	<bean name="sessionFactory2"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSources" />
+
+		<!-- Overrides hibernate.cfg.xml -->
+		<property name="hibernateProperties">
+			<props>
+				<!-- properties chopped for space -->
+				<prop key="hibernate.default_schema">${batch.oracle.tds.schema}</prop>
+				<prop key="hibernate.dialect">${batch.oracle.hibernate.dialect}</prop>
+				<prop key="hibernate.show_sql">false</prop>
+				<prop key="hibernate.format_sql">true</prop>
+				<prop key="hibernate.use_sql_comments">true</prop>
+				<prop key="hibernate.jdbc.batch_size">50</prop>
+				<prop key="hibernate.cache.use_second_level_cache">false</prop>
+				<prop key="hibernate.cache.use_query_cache">false</prop>
+				<prop key="hibernate.jdbc.use_get_generated_keys">true</prop>
+			</props>
+		</property>
+
+		<property name="annotatedClasses">
+			<list>
+				<value>subedi.flatfile.persistence.UploadedFileRecord</value>
+				<value>subedi.flatfile.persistence.UploadedFileRecordWork</value>
+			</list>
+		</property>
+		
+	</bean>
+	
+	<!-- ***************************************** -->
+	<!-- 		 default Session Factory 		   -->
+	<!-- ***************************************** -->
+	 <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+	  <property name="dataSource" ref="dataSource" />
+		  
+	     <property name="hibernateProperties">
+	       <props>
+	         <prop key="hibernate.dialect">${batch.oracle.hibernate.dialect}</prop>  
+	         <prop key="hibernate.default_schema">${batch.oracle.rds.schema}</prop>
+	         <prop key="hibernate.show_sql">false</prop>
+	         <prop key="hibernate.format_sql">true</prop>
+         	 <prop key="hibernate.use_sql_comments">true</prop>
+             <prop key="hibernate.jdbc.batch_size">500</prop> 
+             <prop key="hibernate.cache.use_second_level_cache">false</prop>
+			 <prop key="hibernate.cache.use_query_cache">false</prop>
+			 <prop key="hibernate.jdbc.use_get_generated_keys">true</prop>
+	       </props>
+	     </property>
+
+	     <property name="packagesToScan">
+			<list>
+				<value>subedi.flatfile.persistence</value>
+				<value>subedi.flatfile.persistence.enumerated</value>
+			</list>
+		 </property>  
+		 
+		 <property name="annotatedClasses">
+				<list>
+					<value>subedi.flatfile.persistence.JobControl</value>
+					<value>subedi.flatfile.persistence.OracleSystemColumn</value>
+					<value>subedi.flatfile.persistence.OracleSystemColumnId</value>
+					<value>subedi.flatfile.persistence.RefData</value>
+					<value>subedi.flatfile.persistence.RefDataId</value>
+				</list>
+		</property>
+	</bean>
+	 
+</beans>
