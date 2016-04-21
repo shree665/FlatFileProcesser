@@ -84,12 +84,11 @@
 	<!-- Decider Bean -->
 	<bean id="moreFileDeciderBean" class="subedi.flatfile.processer.FlatFileDecider"/>
 	
-	<bean id="icmPartitioner" class="subedi.flatfile.processor.FlatFilePartitioner" scope="step">
+	<bean id="icmPartitioner" class="subedi.flatfile.processer.FlatFilePartitioner" scope="step">
 	    <description>Creates a new DocTxn and FileTxn from the files ready to be processed. Splits the job into multiple threads.</description>
 		<property name="jobName" value="#{jobParameters['JOB.NAME']}"/>
 		<property name="databaseCode" value="#{jobParameters['DATABASE.CODE']}"/>
-		<property name="docType" value="#{T(gov.ed.fsa.common.enumeration.CodDocTxnDocType).TELEPHONY_ANALYTICS}"/>
-		<property name="fileType" value="#{T(gov.ed.fsa.common.enumeration.CodFileTxnFileType).ICM}"/>
+		<property name="fileType" value="ICM"/>
 		<property name="encoding" value="#{jobParameters['FILE.ENCODING']}"/>
 		<property name="delimiterCharacter" value="#{jobParameters['DELIMITER.CHARACTER']}"/>
 		<property name="mappingName" value="#{jobParameters['MAPPING.NAME']}"/>
@@ -154,7 +153,7 @@
 	</bean>
 	
 	<!--DB2 database Writer -->
-	 <bean id="icmDatabaseWriter" class="subedi.flatfile.writer.IcmWriter" scope="step">
+	 <bean id="icmDatabaseWriter" class="subedi.flatfile.writer.CustomFlatFileWriter" scope="step">
 	    <description>Processes the list of CCMContainers from each file and writes to database.</description>
     	<property name="dataSource" ref="rdsDataSource"/>
     	<property name="columnNames" value="#{stepExecutionContext['FILE.COLUMN.NAMES']}"/>
@@ -163,7 +162,7 @@
     	<property name="mappingName" value="#{jobParameters['MAPPING.NAME']}"/>
     	<property name="itemSqlParameterSourceProvider">
     	<!-- Sql source provider for the auto-generated sql -->
-    		<bean class="subedi.flatfile.writer.IcmSqlParameterSourceProvider">
+    		<bean class="subedi.flatfile.writer.CustomSqlParameterSourceProvider">
     			<property name="mappingName" value="#{jobParameters['MAPPING.NAME']}"/>
     		</bean>
     	</property>
