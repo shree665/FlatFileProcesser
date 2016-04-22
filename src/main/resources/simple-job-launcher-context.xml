@@ -6,7 +6,6 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd" >
 		
 	<import resource="classpath:/data-source-context.xml" />
-	<import resource="classpath:/environment-context.xml" />
 	
 	<bean id="jobLauncher"
 		class="org.springframework.batch.core.launch.support.SimpleJobLauncher">

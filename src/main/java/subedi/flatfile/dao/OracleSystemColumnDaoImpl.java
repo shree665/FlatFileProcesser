@@ -22,7 +22,7 @@ public class OracleSystemColumnDaoImpl implements OracleSystemColumnDao {
 	private StatelessSession session;
 	
 	@Autowired
-	public OracleSystemColumnDaoImpl(@Qualifier("rdsSessionFactory") final SessionFactory totalAccessSessionFactory) {
+	public OracleSystemColumnDaoImpl(@Qualifier("sessionFactory") final SessionFactory totalAccessSessionFactory) {
 		session = totalAccessSessionFactory.openStatelessSession();
 	}
 

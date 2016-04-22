@@ -12,7 +12,7 @@
 		http://www.springframework.org/schema/tx 
 		http://www.springframework.org/schema/tx/spring-tx.xsd">
  	
-  <bean name="dataSource" class="org.apache.commons.dbcp.BasicDataSource" >
+  <bean name="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" >
        <property name="driverClassName" value="${batch.oracle.rds.driver}" />
        <property name="url" value="${batch.oracle.rds.url}" />
        <property name="environment" value="${batch.basedir.environment}" />
@@ -24,22 +24,22 @@
 	   <property name="minEvictableIdleTimeMillis" value="${batch.max.time.between.eviction.runs.millis}" />
 	   <property name="minIdle" value="0" />
 	   <property name="testWhileIdle" value="true" />
-	   <property name="devUsername" value="${batch.oracle.rds.jdbc.dev.user}" />
-	   <property name="devPassword" value="${batch.oracle.rds.jdbc.dev.password}" />
+	   <property name="username" value="${batch.oracle.rds.jdbc.dev.user}" />
+	   <property name="password" value="${batch.oracle.rds.jdbc.dev.password}" />
        <property name="poolPreparedStatements" value="${batch.oracle.rds.pool.prepared.statements}" />              
     </bean>
     
-     <bean name="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager" lazy-init="true">
+     <bean name="transactionManager" class="org.springferamework.jdbc.datasource.DataSourceTransactionManager" lazy-init="true">
   		<property name="dataSource" ref="dataSource" /> 
  	</bean>
  	
- 	<!-- Oracle TDS data source (formerly DB2 Core -->
-    <bean id="dataSource2" class="org.apache.commons.dbcp.BasicDataSource" > <!-- gov.ed.fsa.common.security.CommonBasicDataSource -->
+ 	<!-- Oracle TDS data source -->
+    <bean id="dataSource2" class="org.apache.commons.dbcp2.BasicDataSource" >
        <property name="driverClassName" value="${batch.oracle.tds.driver}" />
        <property name="url" value="${batch.oracle.tds.url}" />
        <property name="environment" value="${batch.basedir.environment}" />
-	   <property name="devUsername" value="${batch.oracle.tds.jdbc.dev.user}" />
-	   <property name="devPassword" value="${batch.oracle.tds.jdbc.dev.password}" />
+	   <property name="username" value="${batch.oracle.tds.jdbc.dev.user}" />
+	   <property name="password" value="${batch.oracle.tds.jdbc.dev.password}" />
        <property name="poolPreparedStatements" value="${batch.oracle.tds.pool.prepared.statements}" />
        <property name="maxActive" value="${batch.oracle.tds.max.active.connections}" />
        <property name="maxIdle" value="${batch.oracle.tds.max.idle.connections}" />                 

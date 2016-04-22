@@ -5,9 +5,10 @@
 	xsi:schemaLocation="
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
-			
-	<!-- Used for common code, such as config item -->
-
+	
+	<import resource="classpath:/data-source-context.xml"/>
+	
+	<!-- Used for as file upload table item -->
 	<bean name="sessionFactory2"
 		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
 		<property name="dataSource" ref="dataSources" />

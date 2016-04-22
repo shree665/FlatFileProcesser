@@ -20,9 +20,8 @@ public class JobCtrlDaoImpl implements JobCtrlDao {
 	
 	private Session session;
 	
-	// Changed codSessionFactory to sessionFactory
 	@Autowired
-	public JobCtrlDaoImpl(@Qualifier("rdsSessionFactory") final SessionFactory codSessionFactory) {
+	public JobCtrlDaoImpl(@Qualifier("sessionFactory") final SessionFactory codSessionFactory) {
 		session = codSessionFactory.openSession();
 	}
 

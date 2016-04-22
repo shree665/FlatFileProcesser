@@ -37,7 +37,7 @@ public class UploadedFileRecordDaoImpl extends HibernateDaoSupport implements Up
 	private StatelessSession session;
 
 	@Autowired
-	public UploadedFileRecordDaoImpl(@Qualifier("tdsSessionFactory") final SessionFactory sessionFactory) {
+	public UploadedFileRecordDaoImpl(@Qualifier("sessionFactory2") final SessionFactory sessionFactory) {
 		this.setHibernateTemplate(new HibernateTemplate(sessionFactory));
 		session = sessionFactory.openStatelessSession();
 	}

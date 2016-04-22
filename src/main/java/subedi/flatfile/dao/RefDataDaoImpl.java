@@ -29,7 +29,7 @@ public class RefDataDaoImpl implements RefDataDao {
 	private StatelessSession session;
 	
 	@Autowired
-	public RefDataDaoImpl(@Qualifier("rdsSessionFactory") final SessionFactory codSessionFactory) {
+	public RefDataDaoImpl(@Qualifier("sessionFactory") final SessionFactory codSessionFactory) {
 		session = codSessionFactory.openStatelessSession();
 	}
 
