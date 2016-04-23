@@ -6,6 +6,7 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd" >
 		
 	<import resource="classpath:/data-source-context.xml" />
+	<import resource="classpath:/environment-context.xml" />
 	
 	<bean id="jobLauncher"
 		class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
@@ -20,7 +21,7 @@
 		class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean" >
 		<property name="lobHandler" ref="lobHandler"/>
 		<property name="dataSource" ref="dataSource"/>
-		<property name="transactionManager" ref="rdsTransactionManager" />
+		<property name="transactionManager" ref="transactionManager" />
 		<property name="tablePrefix" value="${batch.oracle.rds.schema}.BATCH_" />
 		<property name="isolationLevelForCreate" value="ISOLATION_READ_COMMITTED"/>
 	</bean>
@@ -51,5 +52,9 @@
 	
 	<!--  Helper Bean that references the Spring IoC Container to retrieve beans -->
 	<bean id="springBeanFactory" class="subedi.flatfile.util.SpringBeanFactory" scope="singleton" />
+	
+	<bean id="dbUserSource" class="java.lang.String">
+		<constructor-arg type="String" ref="appSpecificUserId" />
+	</bean>	
 
 </beans>

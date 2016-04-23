@@ -73,7 +73,7 @@
         
         <!-- Master step to partion the files using icmPartitioner and icmHandler and sends each file to readEachFile bean -->
 		<batch:step id="readMultipleFileMaster" next="moreFilesDecider">
-			<batch:partition step="readEachFile" partitioner="icmPartitioner" handler="icmHandler"/>
+			<batch:partition step="readEachFile" partitioner="flatFilePartitioner" handler="flatFileHandler"/>
 		</batch:step>
 		
 		<!-- Checks if there are more files to process. -->
@@ -87,8 +87,8 @@
 	<!-- Decider Bean -->
 	<bean id="moreFileDeciderBean" class="subedi.flatfile.processer.FlatFileDecider"/>
 	
-	<bean id="icmPartitioner" class="subedi.flatfile.processer.FlatFilePartitioner" scope="step">
-	    <description>Creates a new DocTxn and FileTxn from the files ready to be processed. Splits the job into multiple threads.</description>
+	<bean id="flatFilePartitioner" class="subedi.flatfile.processer.FlatFilePartitioner" scope="step">
+	    <description>Creates a partition of each file to be processed in each step. Splits the job into multiple threads.</description>
 		<property name="jobName" value="#{jobParameters['JOB.NAME']}"/>
 		<property name="databaseCode" value="#{jobParameters['DATABASE.CODE']}"/>
 		<property name="fileType" value="ICM"/>
@@ -98,7 +98,7 @@
 	</bean>
 	
 	<!-- Handler Bean -->	
-	<bean id="icmHandler" class="org.springframework.batch.core.partition.support.TaskExecutorPartitionHandler" scope="step">
+	<bean id="flatFileHandler" class="org.springframework.batch.core.partition.support.TaskExecutorPartitionHandler" scope="step">
 	    <description>Handler that starts up the threads for execution in the partitioner.</description>
 		<property name="taskExecutor" ref="syncTaskExecutor" />
 		<property name="step" ref="readEachFile" />
@@ -109,8 +109,8 @@
 	
 	<!-- Main Reader and Writer for CCM Files -->
 	<batch:step id="readEachFile" xmlns="http://www.springframework.org/schema/batch">
-		<batch:tasklet transaction-manager="rdsTransactionManager">
-			<batch:chunk reader="icmFlatFileReader" writer="icmDatabaseWriter" commit-interval="#{jobParameters['COMMIT.INTERVAL']}"/>
+		<batch:tasklet transaction-manager="transactionManager">
+			<batch:chunk reader="flatFileReader" writer="databaseWriter" commit-interval="#{jobParameters['COMMIT.INTERVAL']}"/>
 		</batch:tasklet>
 		<batch:listeners>
 			<batch:listener ref="moveListener"/>
@@ -126,7 +126,7 @@
 	</bean>
 	
 	<!-- Flat file Reader. Reads each file  -->
-	<bean id="icmFlatFileReader" class="org.springframework.batch.item.file.FlatFileItemReader" scope="step">
+	<bean id="flatFileReader" class="org.springframework.batch.item.file.FlatFileItemReader" scope="step">
 	    <description>Reads in the files from working and converts to CCMContainer for mapping.</description>
 		<property name="linesToSkip" value="1"/>
 		<property name="encoding" value="#{jobParameters['FILE.ENCODING']}"/>
@@ -156,9 +156,9 @@
 	</bean>
 	
 	<!--DB2 database Writer -->
-	 <bean id="icmDatabaseWriter" class="subedi.flatfile.writer.CustomFlatFileWriter" scope="step">
-	    <description>Processes the list of CCMContainers from each file and writes to database.</description>
-    	<property name="dataSource" ref="rdsDataSource"/>
+	 <bean id="databaseWriter" class="subedi.flatfile.writer.CustomFlatFileWriter" scope="step">
+	    <description>Processes the list of DataContainers from each file and writes to database.</description>
+    	<property name="dataSource" ref="dataSource"/>
     	<property name="columnNames" value="#{stepExecutionContext['FILE.COLUMN.NAMES']}"/>
     	<property name="jobControl" value="#{stepExecutionContext['JOB.CONTROL']}"/>
     	<property name="behaviorCode" value="#{stepExecutionContext['BEHAVIOR']}"/>
@@ -169,19 +169,6 @@
     			<property name="mappingName" value="#{jobParameters['MAPPING.NAME']}"/>
     		</bean>
     	</property>
-    </bean>
-    
-     <!-- Always increment VERSION in BATCH_JOB_LAUNCH, even if job fails -->
-    <bean id="propertyOverrideConfigurer" class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
-      <property name="properties">
-        <bean class="org.springframework.beans.factory.config.PropertiesFactoryBean">
-          <property name="properties">
-            <props>
-              <prop key="incrementingJobListener.alwaysIncrementVersion">true</prop>
-            </props>
-          </property>
-        </bean>
-      </property>
     </bean>
 
 </beans>

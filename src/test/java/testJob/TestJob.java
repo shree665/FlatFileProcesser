@@ -15,7 +15,6 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,6 +64,7 @@ public class TestJob {
 		jobParametersContent.put("MAPPING.NAME", new JobParameter(MAPPING_NAME));
 		jobParametersContent.put("PROCESS.FAILED", new JobParameter(PROCESS_FAILED));
 		jobParametersContent.put("MAX.RUN.COUNT", new JobParameter(MAX_RUN_COUNT));
+		jobParametersContent.put("RUN", new JobParameter(new Date().getTime()));
 		
 		jobParameters = new JobParameters(jobParametersContent);
 	}
