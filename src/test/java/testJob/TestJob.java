@@ -21,6 +21,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+/**
+ * Test class to do integration test of the job
+ * 
+ * @author vivek.subedi
+ *
+ */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {
 	    "classpath:SUBEDIFILE_J01-context.xml",

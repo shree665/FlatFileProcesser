@@ -26,6 +26,8 @@
 		<property name="isolationLevelForCreate" value="ISOLATION_READ_COMMITTED"/>
 	</bean>
 	
+	<!-- Lob handler to handle the column value which are more than 4000 characters long
+		According to oracle standard, when the column value is 4k long, oracle stores value as a clob -->
 	<bean id="lobHandler" class="org.springframework.jdbc.support.lob.OracleLobHandler">
 		<property name="nativeJdbcExtractor">
 			<bean class="org.springframework.jdbc.support.nativejdbc.CommonsDbcpNativeJdbcExtractor"/>

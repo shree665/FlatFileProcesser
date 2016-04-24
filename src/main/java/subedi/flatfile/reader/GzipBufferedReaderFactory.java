@@ -18,6 +18,8 @@ import org.springframework.core.io.Resource;
 import subedi.flatfile.util.FlatFileUtil;
 
 /**
+ * Reader to read .gz files 
+ * 
  * @author vivek.subedi
  *
  */
