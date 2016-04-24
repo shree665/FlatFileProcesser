@@ -3,7 +3,6 @@ package subedi.flatfile.dao;
 import java.util.List;
 
 import org.hibernate.Criteria;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,23 +12,25 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import subedi.flatfile.persistence.JobControl;
-
+/**
+ *
+ * @author vivek.subedi
+ *
+ */
 @Repository
 @Transactional
-public class JobCtrlDaoImpl implements JobCtrlDao {
-	
-	private Session session;
+public class JobCtrlDaoImpl extends HibernateAbstractDao<Object> implements JobCtrlDao{
 	
 	@Autowired
-	public JobCtrlDaoImpl(@Qualifier("sessionFactory") final SessionFactory codSessionFactory) {
-		session = codSessionFactory.openSession();
+	public JobCtrlDaoImpl(@Qualifier("sessionFactory") final SessionFactory sessionFactory) {
+		super(sessionFactory);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<JobControl> getJobControlsForDatabase(final String jobName, final String databaseCode) {
 
-		final Criteria criteria = session.createCriteria(JobControl.class);
+		final Criteria criteria = this.getSession().createCriteria(JobControl.class);
 		criteria.add(Restrictions.eq("databaseCode", databaseCode));
 		criteria.add(Restrictions.eq("jobName", jobName));
 

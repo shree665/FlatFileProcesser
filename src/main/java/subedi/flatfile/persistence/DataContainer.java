@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Map;
 
 /**
+ * Object to hold a line record from file in a map. Map will have column name and its value as 
+ * a key value pair.
  * 
  * @author vivek.subedi
  *

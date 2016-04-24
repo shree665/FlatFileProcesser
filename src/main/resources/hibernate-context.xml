@@ -9,15 +9,15 @@
 	<!-- Used for as file upload table item -->
 	<bean name="sessionFactory2"
 		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
-		<property name="dataSource" ref="dataSources" />
+		<property name="dataSource" ref="dataSource2" />
 
 		<!-- Overrides hibernate.cfg.xml -->
 		<property name="hibernateProperties">
 			<props>
 				<!-- properties chopped for space -->
+				<prop key="hibernate.dialect">org.hibernate.dialect.OracleDialect</prop>
 				<prop key="hibernate.default_schema">${batch.oracle.tds.schema}</prop>
-				<prop key="hibernate.dialect">${batch.oracle.hibernate.dialect}</prop>
-				<prop key="hibernate.show_sql">false</prop>
+				<prop key="hibernate.show_sql">true</prop>
 				<prop key="hibernate.format_sql">true</prop>
 				<prop key="hibernate.use_sql_comments">true</prop>
 				<prop key="hibernate.jdbc.batch_size">50</prop>
@@ -44,9 +44,9 @@
 		  
 	     <property name="hibernateProperties">
 	       <props>
-	         <prop key="hibernate.dialect">${batch.oracle.hibernate.dialect}</prop>  
+	         <prop key="hibernate.dialect">org.hibernate.dialect.OracleDialect</prop>  
 	         <prop key="hibernate.default_schema">${batch.oracle.rds.schema}</prop>
-	         <prop key="hibernate.show_sql">false</prop>
+	         <prop key="hibernate.show_sql">true</prop>
 	         <prop key="hibernate.format_sql">true</prop>
          	 <prop key="hibernate.use_sql_comments">true</prop>
              <prop key="hibernate.jdbc.batch_size">500</prop> 

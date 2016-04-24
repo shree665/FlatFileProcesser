@@ -10,7 +10,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 /**
- * This is POJO class to hold the uploaded file records
+ * This is POJO class to hold the uploaded file records. This object has one to one relationship
+ * with UploadFileRecordWork class. 
  * 
  * @author vivek.subedi
  *

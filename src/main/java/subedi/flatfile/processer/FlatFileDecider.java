@@ -13,6 +13,13 @@ import org.springframework.batch.core.job.flow.JobExecutionDecider;
 
 import subedi.flatfile.util.FlatFileUtil;
 
+/**
+ * Decider to decide whether job has to run again or not. Job will run in a loop if there
+ * are any files left in staging directory.
+ * 
+ * @author vivek.subedi
+ *
+ */
 public class FlatFileDecider implements JobExecutionDecider {
 	
 	private static Logger logger = LoggerFactory.getLogger(FlatFileDecider.class);

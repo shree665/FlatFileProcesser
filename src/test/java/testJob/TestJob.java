@@ -41,7 +41,7 @@ public class TestJob {
 	private final String FILE_CATAGORY = "TELEPHONY_ANALYTICS";
 	private final String FILE_STATUS = "NEW";
 	private final String FILE_TYPE = "ICM";
-	private final String MAPPING_NAME = "CCM_ICM_MAPPING";
+	private final String MAPPING_NAME = "ICM_MAPPING";
 	private final String PROCESS_FAILED = "true";
 	private final long MAX_RUN_COUNT = 10L;
 

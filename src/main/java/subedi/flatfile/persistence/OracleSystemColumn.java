@@ -8,7 +8,12 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
-
+/**
+ * Hibernate object to map the column properties of a table.
+ * 
+ * @author vivek.subedi
+ *
+ */
 @Entity
 @Table(name = "ALL_TAB_COLUMNS", schema="SYS")
 public class OracleSystemColumn implements Serializable {

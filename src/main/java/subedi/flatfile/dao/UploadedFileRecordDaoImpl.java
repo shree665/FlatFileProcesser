@@ -5,14 +5,11 @@ import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
-import org.hibernate.StatelessSession;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.orm.hibernate4.HibernateTemplate;
-import org.springframework.orm.hibernate4.support.HibernateDaoSupport;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -30,16 +27,13 @@ import subedi.flatfile.persistence.enumerated.FileTypeEnum;
 
 @Repository
 @Transactional
-public class UploadedFileRecordDaoImpl extends HibernateDaoSupport implements UploadedFileRecordDao {
+public class UploadedFileRecordDaoImpl extends HibernateAbstractDao<Object> implements UploadedFileRecordDao {
 
 	private static final Logger logger = LoggerFactory.getLogger(UploadedFileRecordDaoImpl.class);
-	
-	private StatelessSession session;
 
 	@Autowired
 	public UploadedFileRecordDaoImpl(@Qualifier("sessionFactory2") final SessionFactory sessionFactory) {
-		this.setHibernateTemplate(new HibernateTemplate(sessionFactory));
-		session = sessionFactory.openStatelessSession();
+		super(sessionFactory);
 	}
 
 	/*
@@ -48,7 +42,7 @@ public class UploadedFileRecordDaoImpl extends HibernateDaoSupport implements Up
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<UploadedFileRecord> getUploadedFiles(final FileStatusEnum fileStat, final FileTypeEnum fileType, final String fileCat) {
-		final Criteria criteria = session.createCriteria(UploadedFileRecord.class);
+		final Criteria criteria = this.getSession().createCriteria(UploadedFileRecord.class);
 		criteria.add(Restrictions.eq("fileCat", fileCat));
 
 		final Criteria typeAndStatusCriteria = criteria.createCriteria("uploadedFileRecordWork");
@@ -78,7 +72,7 @@ public class UploadedFileRecordDaoImpl extends HibernateDaoSupport implements Up
 	 */
 	@Override
 	public UploadedFileRecord getUploadedFileFromTable(final Long fileId) {
-		final Criteria criteria = session.createCriteria(UploadedFileRecord.class);
+		final Criteria criteria = this.getSession().createCriteria(UploadedFileRecord.class);
 		criteria.add(Restrictions.eq("uploadedFileId", fileId));
 		return (UploadedFileRecord) criteria.uniqueResult();
 	}

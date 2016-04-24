@@ -3,7 +3,11 @@ package subedi.flatfile.service;
 import java.util.List;
 
 import subedi.flatfile.persistence.JobControl;
-
+/**
+ * 
+ * @author vivek.subedi
+ *
+ */
 public interface JobCtrlService {
 	
 	List<JobControl> getJobControlsForDatabase(String jobName, String databaseCode, String behaviors);

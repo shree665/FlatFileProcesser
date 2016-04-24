@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
-import org.hibernate.StatelessSession;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,19 +23,17 @@ import subedi.flatfile.persistence.RefData;
 
 @Repository
 @Transactional
-public class RefDataDaoImpl implements RefDataDao {
-	
-	private StatelessSession session;
-	
+public class RefDataDaoImpl extends HibernateAbstractDao<Object> implements RefDataDao {
+
 	@Autowired
-	public RefDataDaoImpl(@Qualifier("sessionFactory") final SessionFactory codSessionFactory) {
-		session = codSessionFactory.openStatelessSession();
+	public RefDataDaoImpl(@Qualifier("sessionFactory") final SessionFactory sessionFactory) {
+		super(sessionFactory);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<RefData> getRefDataforDatabase(final String mappingName) {
-		final Criteria criteria = session.createCriteria(RefData.class);
+		final Criteria criteria = this.getSession().createCriteria(RefData.class);
 		criteria.add(Restrictions.eq("id.ccmMappingName", mappingName));
 		final List<RefData> refDataList = criteria.list();
 		Assert.notNull(refDataList, "Query on Ref data failed");

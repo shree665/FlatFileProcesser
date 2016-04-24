@@ -11,6 +11,11 @@ import subedi.flatfile.dao.JobCtrlDao;
 import subedi.flatfile.persistence.JobControl;
 import subedi.flatfile.persistence.enumerated.BehaviorEnum;
 
+/**
+ * 
+ * @author vivek.subedi
+ *
+ */
 @Service
 public class JobCtrlServiceImpl implements JobCtrlService {
 	

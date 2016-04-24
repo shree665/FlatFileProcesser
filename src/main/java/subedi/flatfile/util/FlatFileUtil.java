@@ -39,9 +39,7 @@ public class FlatFileUtil {
 	
 	//Cisco Constants
 	public static final String DB2_ICM_TABLE_PREFIX = "CCM_ICM_";
-	public static final String DB2_NICE_TABLE_PREFIX = "CCM_NICE_";
 	public static final String ICM_DATABASECODE = "ICM";
-	public static final String NICE_DATABASECODE = "NICE";
 	private static final String YEAR = "$YEAR";
 	private static final String MONTH = "$MONTH";
 	private static final String DAY = "$DAY";
@@ -54,22 +52,15 @@ public class FlatFileUtil {
 	public static final DateTimeFormatter ICM_FILE_TIMESTAMP_FORMAT_WITH_MILLISECONDS = DateTimeFormat.forPattern("YYYY-MM-dd HH:mm:ss.SSSSSSSSS");
 	public static final DateTimeFormatter ICM_FILE_DATE_FORMAT = DateTimeFormat.forPattern("YYYY-MM-dd");
 
-	// Time stamp format for NICE
-	public static final DateTimeFormatter NICE_FILE_TIMESTAMP_FORMAT = DateTimeFormat.forPattern("YYYY-MM-dd HH:mm:ss");
-	public static final DateTimeFormatter NICE_FILE_TIMESTAMP_FORMAT_WITH_MILLISECOND = DateTimeFormat.forPattern("YYYY-MM-dd HH:mm:ss.SS");
-	public static final DateTimeFormatter NICE_FILE_TIMESTAMP_FORMAT_WITH_MILLISECONDS = DateTimeFormat.forPattern("YYYY-MM-dd HH:mm:ss.SSSSSSSSS");
-	public static final DateTimeFormatter NICE_FILE_DATE_FORMAT = DateTimeFormat.forPattern("YYYY-MM-dd");
-
 	//Flat File Patterns
 	public static final String FILE_FORMAT_REGEX = "dbo\\.(\\w+)\\.([\\d\\.]+)(\\.gz)?$";
-	public static final String NICE_FILE_PREFIX_FORMAT_REGEX = "^nice(\\w+\\.+\\w+)";
 	public static final String ICM_FILE_PREFIX_FORMAT_REGEX = "^inst(\\w+\\.+\\w+)";
 	public static final DateTimeFormatter FLAT_FILE_TIMESTAMP_FORMAT = DateTimeFormat.forPattern("YYYYMMdd.HHmmss.SSSSSSS");
 	
 	//LOCAL TESTING VALUES (we should put these values in database and retrieve it from database)
 	public static final String STAGING_PATH = "/apps/batch/staging/test/";
 	public static final String WORKING_PATH = "/apps/batch/working/test/";
-	public static final String ARCHIVE_PATH = "/apps/batch/archive/test/";
+	public static final String ARCHIVE_PATH = "/apps/batch/archive/$YEAR/$MONTH/$DAY/test/";
 
 	// Keys
 	public static final String JOB_CONTROL_KEY = "JOB.CONTROL";
@@ -217,9 +208,6 @@ public class FlatFileUtil {
 		if (databaseCode.equalsIgnoreCase(ICM_DATABASECODE)) {
 			replacedTableName = tableName.replace(DB2_ICM_TABLE_PREFIX, "");
 		}
-		if (databaseCode.equalsIgnoreCase(NICE_DATABASECODE)) {
-			replacedTableName = tableName.replace(DB2_NICE_TABLE_PREFIX, "");
-		}
 		return replacedTableName;
 	}
 
@@ -265,8 +253,6 @@ public class FlatFileUtil {
 
 		if (FlatFileUtil.ICM_DATABASECODE.equalsIgnoreCase(databaseCode)) {
 			pattern = Pattern.compile(FlatFileUtil.ICM_FILE_PREFIX_FORMAT_REGEX);
-		} else if (FlatFileUtil.NICE_DATABASECODE.equalsIgnoreCase(databaseCode)) {
-			pattern = Pattern.compile(FlatFileUtil.NICE_FILE_PREFIX_FORMAT_REGEX);
 		} else {
 			throw new IllegalStateException("Invalid databasecode ["+databaseCode+"]");
 		}
@@ -310,15 +296,15 @@ public class FlatFileUtil {
 	}
 
 	private static String compressArchive(String sourceFilePath, String destRootDirPath, String docTypeSubDirName, boolean deleteSource) {
-		final String newDestRootDirPath = replacePlaceholderValues(destRootDirPath);
+		
+		String newDestRootDirPath = replacePlaceholderValues(destRootDirPath);
 		logger.info("archiving from [{}] to [{}]", sourceFilePath, newDestRootDirPath);
 		
 		File sourceFile = new File(sourceFilePath);
 		File destRootDir = new File(newDestRootDirPath);
 		
 		try {
-			Assert.isTrue(sourceFile.exists() && sourceFile.isFile(), "source file [" + sourceFile.getCanonicalPath()
-					+ "] does not exist or is not a file");
+			Assert.isTrue(sourceFile.exists() && sourceFile.isFile(), "source file [" + sourceFile.getCanonicalPath() + "] does not exist or is not a file");
 
 			String archiveFilePath = null;
 			if (!destRootDir.exists() && destRootDir.mkdirs()) {
@@ -338,8 +324,8 @@ public class FlatFileUtil {
 				archiveDir.mkdirs();
 			}
 
-			final String gzippedFileName = sourceFile.getName() + ".gz";
-			final File gzippedArchiveFile = new File(archiveDir, gzippedFileName);
+			String gzippedFileName = sourceFile.getName() + ".gz";
+			File gzippedArchiveFile = new File(archiveDir, gzippedFileName);
 
 			if (gzip(sourceFile, gzippedArchiveFile)) {
 				logger.debug("archived from [" + sourceFile.getCanonicalPath() + "] to [" + gzippedArchiveFile.getCanonicalPath() + "]");
@@ -354,18 +340,18 @@ public class FlatFileUtil {
 			}
 
 			return archiveFilePath;
-		} catch (final IOException e) {
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 		
 	}
 	
-	public static boolean gzip(final File sourceFile, final File archiveFile) {
+	public static boolean gzip(File sourceFile, File archiveFile) {
 		return gzip(sourceFile, archiveFile, false);
 	}
 	
-	public static boolean gzip(final File sourceFile, final File archiveFile, final boolean throwsException) {
-		final byte inputData[] = new byte[BUFFER_SIZE];
+	public static boolean gzip(File sourceFile, File archiveFile, boolean throwsException) {
+		byte inputData[] = new byte[BUFFER_SIZE];
 		int inputCount = 0;
 
 		InputStream unzippedFileInputStream = null;
@@ -378,7 +364,7 @@ public class FlatFileUtil {
 			}
 			gzipOutputStream.flush();
 			return true;
-		} catch (final IOException e) {
+		} catch (IOException e) {
 			logger.error("Could not gzip file: " + sourceFile.getAbsolutePath());
 			if (throwsException) {
 				throw new IllegalStateException("Could not zip file!", e);
@@ -387,12 +373,12 @@ public class FlatFileUtil {
 		} finally {
 			try {
 				gzipOutputStream.close();
-			} catch (final Throwable e) {
+			} catch (Throwable e) {
 				// ignore all throwables
 			}
 			try {
 				unzippedFileInputStream.close();
-			} catch (final Throwable e) {
+			} catch (Throwable e) {
 				// ignore all throwables
 			}
 		}

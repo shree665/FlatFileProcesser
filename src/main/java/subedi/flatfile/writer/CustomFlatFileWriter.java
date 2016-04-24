@@ -78,7 +78,7 @@ public class CustomFlatFileWriter extends JdbcBatchItemWriter<DataContainer> imp
 	 */
 
 	@Override
-	public void write(final List<? extends DataContainer> item) throws Exception {
+	public void write(List<? extends DataContainer> item) throws Exception {
 		this.rowCount = String.valueOf(item.size());
 		this.sqlStatement = sqlStatement.replace("<ROW_COUNT>", rowCount);
 		super.setSql(sqlStatement);
@@ -97,16 +97,16 @@ public class CustomFlatFileWriter extends JdbcBatchItemWriter<DataContainer> imp
 		jobControl = jobCtrlService.getJobControl(jobControlId);
 
 		String sql = null;
-		final String db2TableName = FlatFileUtil.DB2_ICM_TABLE_PREFIX+jobControl.getTableName();
+		String db2TableName = FlatFileUtil.DB2_ICM_TABLE_PREFIX+jobControl.getTableName();
 
 		//Getting refData to map
-		final List<RefData> allRefDatas = refDataService.getRefDataForDatabase(mappingName);
-		final Map<String, String> idMap = new HashMap<>();
-		final Map<String, String> db2ColumnMap = new HashMap<>();
-		final Map<String, String> fileColumnMap = new HashMap<>();
+		List<RefData> allRefDatas = refDataService.getRefDataForDatabase(mappingName);
+		Map<String, String> idMap = new HashMap<>();
+		Map<String, String> db2ColumnMap = new HashMap<>();
+		Map<String, String> fileColumnMap = new HashMap<>();
 
 		//retrieving only column names and column ids from refdata for a specific table and putting into the map
-		for (final RefData refData : allRefDatas) {
+		for (RefData refData : allRefDatas) {
 			if (refData.getDb2TableName().equalsIgnoreCase(db2TableName.replace("_RP", ""))) {
 				db2ColumnMap.put(refData.getDb2ColumnName(), refData.getId().getColumnNameFromFile());
 				fileColumnMap.put(refData.getId().getColumnNameFromFile(), refData.getDb2ColumnName());
@@ -117,19 +117,19 @@ public class CustomFlatFileWriter extends JdbcBatchItemWriter<DataContainer> imp
 		}
 
 		//Mapping column id's to the DB2 table
-		final List<String> idColumn = new ArrayList<>();
-		final Iterator<?> iterator = idMap.entrySet().iterator();
+		List<String> idColumn = new ArrayList<>();
+		Iterator<?> iterator = idMap.entrySet().iterator();
 		while (iterator.hasNext()) {
-			final Map.Entry pairs = (Map.Entry) iterator.next();
+			Map.Entry pairs = (Map.Entry) iterator.next();
 			idColumn.add((String) pairs.getValue());
 
 		}
 
 		//getting columns for the specific table
-		final List<OracleSystemColumn> columns = oracleSystemColumnService.getOracleColumnsForTable(schema, db2TableName);
+		List<OracleSystemColumn> columns = oracleSystemColumnService.getOracleColumnsForTable(schema, db2TableName);
 
-		final List<String> columnLabels = new ArrayList<>();
-		final List<String> columnLabelsFromFile = new ArrayList<>();
+		List<String> columnLabels = new ArrayList<>();
+		List<String> columnLabelsFromFile = new ArrayList<>();
 
 		//Adds column names that we have in file into the columnLabelsFromFile
 		for (int i = 0; i < columnNames.length; i++) {
@@ -137,19 +137,19 @@ public class CustomFlatFileWriter extends JdbcBatchItemWriter<DataContainer> imp
 		}
 
 		//Adds column names that we have in DB2 into the columnLabels
-		for (final OracleSystemColumn oracleSystemColumn : columns) {
+		for (OracleSystemColumn oracleSystemColumn : columns) {
 			columnLabels.add(oracleSystemColumn.getId().getColumnName());
 		}
 
 		//checking for null column names. If we found we throw exception
-		for (final String string : columnLabelsFromFile) {
+		for (String string : columnLabelsFromFile) {
 			if (fileColumnMap.get(string) == null) {
 				throw new IllegalStateException("The mapping is missing from REF_DATA_TA for the ["+string+"] column of file for table ["+db2TableName+"]");
 			}
 		}
 
-		final List<String> mapFileColumnLabels = new ArrayList<>();
-		for (final String string : columnLabels) {
+		List<String> mapFileColumnLabels = new ArrayList<>();
+		for (String string : columnLabels) {
 			if (db2ColumnMap.get(string) == null) {
 				logger.warn("The mapping is missing from REF_DATA_TA for the ["+string+"] column for table ["+db2TableName+"]. This column might not "
 						+ "be in the file that we receive");
@@ -158,8 +158,8 @@ public class CustomFlatFileWriter extends JdbcBatchItemWriter<DataContainer> imp
 			}
 		}
 
-		final List<String> mappedDb2Columns = new ArrayList<>();
-		for (final String string : mapFileColumnLabels) {
+		List<String> mappedDb2Columns = new ArrayList<>();
+		for (String string : mapFileColumnLabels) {
 			mappedDb2Columns.add(fileColumnMap.get(string));
 		}
 
@@ -197,7 +197,7 @@ public class CustomFlatFileWriter extends JdbcBatchItemWriter<DataContainer> imp
 	 * @param columnId - The primary key of table
 	 * @return the merge sql as a String
 	 */
-	private String getMergeSQL(final String schemaTable, final List<String> columnLabels, final List<String> columnLabelsFromFile, final List<String> columnId ) {
+	private String getMergeSQL(String schemaTable, List<String> columnLabels, List<String> columnLabelsFromFile, List<String> columnId ) {
 		String sql = "";
 
 		sql += MERGE_SQL;
@@ -207,7 +207,7 @@ public class CustomFlatFileWriter extends JdbcBatchItemWriter<DataContainer> imp
 		sql = sql.replace(COLUMN_INSERT_LABELS, FlatFileUtil.getColumInsertLabels(columnLabels));
 		sql = sql.replace(UPDATE_VALUE, FlatFileUtil.getUpdateColumns(columnLabels));
 
-		final List<String> columnLabelsForUpdate = columnLabels;
+		List<String> columnLabelsForUpdate = columnLabels;
 		columnLabelsForUpdate.removeAll(columnId);
 
 		sql = sql.replace(COLUMN_UPDATE_LABELS, FlatFileUtil.getColumUpdateLabels(columnLabelsForUpdate));
@@ -224,7 +224,7 @@ public class CustomFlatFileWriter extends JdbcBatchItemWriter<DataContainer> imp
 	 * @param columnLabelsFromFile - the column names from file
 	 * @return the insert sql as a String
 	 */
-	private String getInsertSQL(final String schemaTable, final List<String> columnLabels, final List<String> columnLabelsFromFile) {
+	private String getInsertSQL(String schemaTable, List<String> columnLabels, List<String> columnLabelsFromFile) {
 		String sql = "";
 
 		sql += INSERT_SQL;
@@ -236,28 +236,28 @@ public class CustomFlatFileWriter extends JdbcBatchItemWriter<DataContainer> imp
 		return sql;
 	}
 
-	public void setSchema(final String schema) {
+	public void setSchema(String schema) {
 		this.schema = schema;
 	}
 
 
-	public void setRefDataService(final RefDataService refDataService) {
+	public void setRefDataService(RefDataService refDataService) {
 		this.refDataService = refDataService;
 	}
 
-	public void setJobControlService(final JobCtrlService jobCtrlService) {
+	public void setJobControlService(JobCtrlService jobCtrlService) {
 		this.jobCtrlService = jobCtrlService;
 	}
 
-	public void setColumnNames(final String[] columnNames) {
+	public void setColumnNames(String[] columnNames) {
 		this.columnNames = columnNames;
 	}
 
-	public void setJobControl(final Integer jobControlId) {
+	public void setJobControl(Integer jobControlId) {
 		this.jobControlId = jobControlId;
 	}
 
-	public void setDb2TableName(final String db2TableName) {
+	public void setDb2TableName(String db2TableName) {
 		this.db2TableName = db2TableName;
 	}
 
@@ -265,7 +265,7 @@ public class CustomFlatFileWriter extends JdbcBatchItemWriter<DataContainer> imp
 		return db2TableName;
 	}
 
-	public void setBehaviorCode(final BehaviorEnum behaviorCode) {
+	public void setBehaviorCode(BehaviorEnum behaviorCode) {
 		this.behaviorCode = behaviorCode;
 	}
 
@@ -273,7 +273,7 @@ public class CustomFlatFileWriter extends JdbcBatchItemWriter<DataContainer> imp
 		return behaviorCode;
 	}
 
-	public void setMappingName(final String mappingName) {
+	public void setMappingName(String mappingName) {
 		this.mappingName = mappingName;
 	}
 

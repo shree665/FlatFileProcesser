@@ -16,6 +16,8 @@ import subedi.flatfile.persistence.enumerated.FileStatusEnum;
 import subedi.flatfile.persistence.enumerated.FileTypeEnum;
 
 /**
+ * Child class of main UploadfileRecord table
+ * 
  * @author vivek.subedi
  *
  */

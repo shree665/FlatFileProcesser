@@ -31,7 +31,9 @@ import subedi.flatfile.service.RefDataService;
 import subedi.flatfile.util.FlatFileUtil;
 
 /**
- * The Class of FlatFilePartitioner.
+ * Partitioner to create a step for each file that job process. It will store 
+ * all the file information in step execution context and creates a new thread for each step
+ * to process a file. While creating a step, if the file is empty, a new step will not get created. 
  *
  * @author vivek.subedi
  */
@@ -63,7 +65,7 @@ public class FlatFilePartitioner implements Partitioner {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public Map<String, ExecutionContext> partition(final int gridSize) {
+	public Map<String, ExecutionContext> partition(int gridSize) {
 
 		//Partitions store in map of execution contexts
 		Map<String, ExecutionContext> map = new HashMap<String, ExecutionContext>();
@@ -96,24 +98,24 @@ public class FlatFilePartitioner implements Partitioner {
 		List<RefData> myRefDatas = refDataService.getRefDataForDatabase(mappingName);
 
 		Map<String, String> fileToDB2tableMap = new HashMap<String, String>();
-		for (final RefData refData : myRefDatas) {
+		for (RefData refData : myRefDatas) {
 			fileToDB2tableMap.put(refData.getId().getTableNameFromFile(), refData.getDb2TableName());
 		}
 
 		//List of file records that will actually be processed
-		final List<File> toBeProcessedFileRecords = filterFilesToBeProcessed(filteredFiles, fileToDB2tableMap);
+		List<File> toBeProcessedFileRecords = filterFilesToBeProcessed(filteredFiles, fileToDB2tableMap);
 
 		//Stores the files that need to be ignored for the iteration and will be processed on next iteration
-		final List<File> ignored = removeOldFileForSameTable(toBeProcessedFileRecords);
+		List<File> ignored = removeOldFileForSameTable(toBeProcessedFileRecords);
 
 		//removes all the files that are not being process on iteration
 		toBeProcessedFileRecords.removeAll(ignored);
 
 
 		//Processing each file for a table that is in active ETL
-		for (final File file : toBeProcessedFileRecords) {
+		for (File file : toBeProcessedFileRecords) {
 
-			final ExecutionContext context = new ExecutionContext();
+			ExecutionContext context = new ExecutionContext();
 
 			try {
 				BufferedReader in = null;
@@ -135,7 +137,7 @@ public class FlatFilePartitioner implements Partitioner {
 					if(!in.ready() || StringUtils.isBlank(in.readLine())) {
 						logger.info("No data to process for file: ["+file.getPath()+"], it will be archived.");
 
-						final String archiveFilePath = FlatFileUtil.archive(file, new File(archiveFolderPath), fileType, true);
+						String archiveFilePath = FlatFileUtil.archive(file, new File(archiveFolderPath), fileType, true);
 						logger.info("File archived to ["+archiveFilePath+"]");
 
 						in.close();
@@ -145,13 +147,17 @@ public class FlatFilePartitioner implements Partitioner {
 
 					in.close();
 
-				} catch (final IOException e) {
-					try {in.close();} catch (final Exception e1) {};
+				} catch (IOException e) {
+					try {
+						in.close();
+						} catch (Exception e1) {
+							//nothing to do
+							};
 					throw new IOException("Couldn't read file ["+file.getPath()+"]. Check for the file path "+e);
 				}
 
 				//getting jobControl for a file i.e. for db2 table
-				final JobControl jobControl = getJobControlForTable(file.getName(), fileToDB2tableMap);
+				JobControl jobControl = getJobControlForTable(file.getName(), fileToDB2tableMap);
 
 				//putting necessary values on step execution context
 				context.put(FlatFileUtil.FILE_COLUMN_NAME_KEY, columnNamesLine);
@@ -159,7 +165,7 @@ public class FlatFilePartitioner implements Partitioner {
 				context.put(FlatFileUtil.JOB_CONTROL_KEY, jobControl.getJobControlId());
 				context.put(FlatFileUtil.MAPPING_NAME_KEY, mappingName);
 				context.put(FlatFileUtil.DATABASECODE_KEY, databaseCode);
-				context.put(FlatFileUtil.FILE_NAME_KEY, file.getAbsolutePath());
+				context.put(FlatFileUtil.FILE_NAME_KEY, file.getPath());
 
 				logger.info("Located file to process:"
 						+ "\n\tFile: ["+file.getPath()+"]"
@@ -167,7 +173,7 @@ public class FlatFilePartitioner implements Partitioner {
 						+ "\n\tETL Behavior: ["+jobControl.getBehaviorCode()+"]"
 						);
 
-			} catch (final Exception e) {
+			} catch (Exception e) {
 				throw new IllegalArgumentException("Error on Partitioning! File error for ["+file.getPath()+"]", e);
 			}
 
@@ -184,15 +190,15 @@ public class FlatFilePartitioner implements Partitioner {
 	 * @param fileToDB2tableMap - map of ref data
 	 * @return the job control
 	 */
-	private JobControl getJobControlForTable(final String uploadedFileName, final Map<String, String> fileToDB2tableMap) {
+	private JobControl getJobControlForTable(String uploadedFileName, Map<String, String> fileToDB2tableMap) {
 
 		//retrieving table name from the file name and mapping that name to the db2 table name
-		final String fileTableName = FlatFileUtil.retrieveTableNameFromFile(uploadedFileName);
-		final String db2TableName = fileToDB2tableMap.get(fileTableName);
+		String fileTableName = FlatFileUtil.retrieveTableNameFromFile(uploadedFileName);
+		String db2TableName = fileToDB2tableMap.get(fileTableName);
 
 		//clearing CCM_ICM_ from mapped db2 table name because to match with jobContrl's table name
-		final String tableName = FlatFileUtil.replaceCcmPrefixToTableName(db2TableName, databaseCode);
-		final JobControl jobControl = jobCtrlService.getJobControlForTable(jobName, databaseCode, tableName);
+		String tableName = FlatFileUtil.replaceCcmPrefixToTableName(db2TableName, databaseCode);
+		JobControl jobControl = jobCtrlService.getJobControlForTable(jobName, databaseCode, tableName);
 
 		return jobControl;
 	}
@@ -203,8 +209,8 @@ public class FlatFilePartitioner implements Partitioner {
 	 * @param theFiles the the files
 	 * @return void
 	 */
-	private void checkIntegrityOfFiles(final Collection<File> theFiles) {
-		for(final File theFile : theFiles) {
+	private void checkIntegrityOfFiles(Collection<File> theFiles) {
+		for(File theFile : theFiles) {
 			if(!theFile.exists()) {
 				throw new IllegalStateException("The file denoted by server path ["+theFile.getPath()+"] does not exist");
 			} else if (!theFile.isFile()) {
@@ -221,22 +227,22 @@ public class FlatFilePartitioner implements Partitioner {
 	 * @param toBeProcessedFiles - the list of to be processed files
 	 * @return the list for files that need to be processed before other files and new files
 	 */
-	private List<File> removeOldFileForSameTable(final List<File> toBeProcessedFiles) {
+	private List<File> removeOldFileForSameTable(List<File> toBeProcessedFiles) {
 
 		//Checking that only one file per table, use the oldest one
-		final List<File> ignored = new ArrayList<File>();
+		List<File> ignored = new ArrayList<File>();
 
-		for(final File outerLoopFile : toBeProcessedFiles) {
-			final String outlerLoopRecordName = FlatFileUtil.retrieveTableNameFromFile(outerLoopFile.getName());
-			final Date outlerLoopRecordDate = FlatFileUtil.getTimestampFromFileName(outerLoopFile.getName());
+		for(File outerLoopFile : toBeProcessedFiles) {
+			String outlerLoopRecordName = FlatFileUtil.retrieveTableNameFromFile(outerLoopFile.getName());
+			Date outlerLoopRecordDate = FlatFileUtil.getTimestampFromFileName(outerLoopFile.getName());
 
-			for(final File innerLoopFile : toBeProcessedFiles) {
+			for(File innerLoopFile : toBeProcessedFiles) {
 
 				if(!outerLoopFile.equals(innerLoopFile)
 					&& outlerLoopRecordName.equalsIgnoreCase(
 					FlatFileUtil.retrieveTableNameFromFile(innerLoopFile.getName()))) {
 
-					final Date innerLoopDate = FlatFileUtil.getTimestampFromFileName(innerLoopFile.getName());
+					Date innerLoopDate = FlatFileUtil.getTimestampFromFileName(innerLoopFile.getName());
 
 					if(outlerLoopRecordDate.after(innerLoopDate)) {
 						ignored.add(outerLoopFile);
@@ -260,15 +266,15 @@ public class FlatFilePartitioner implements Partitioner {
 	 * @param fileToDB2tableMap - mapping from ref_data table
 	 * @return the list of files that needs to be processed
 	 */
-	private List<File> filterFilesToBeProcessed(final Collection<File> files, final Map<String, String> fileToDB2tableMap) {
+	private List<File> filterFilesToBeProcessed(Collection<File> files, Map<String, String> fileToDB2tableMap) {
 
 		//List of file records that will actually be processed
-		final List<File> toBeProcessedFileRecords = new ArrayList<File>();
+		List<File> toBeProcessedFileRecords = new ArrayList<File>();
 		//checking each uploaded file for the ETL. If ETL is active we use that file
-		for (final File file : files) {
+		for (File file : files) {
 
 			//jobControl to check the etl status
-			final JobControl jobControl = getJobControlForTable(file.getName(), fileToDB2tableMap);
+			JobControl jobControl = getJobControlForTable(file.getName(), fileToDB2tableMap);
 
 			//controlled by frequency code
 			final boolean activateETL = determineIfEtlActive(jobControl.getFrequencyCode());
@@ -286,7 +292,7 @@ public class FlatFilePartitioner implements Partitioner {
 	 * @param frequencyCode the frequency code
 	 * @return true, if successful
 	 */
-	private boolean determineIfEtlActive(final FrequencyEnum frequencyCode) {
+	private boolean determineIfEtlActive(FrequencyEnum frequencyCode) {
 
 		switch (frequencyCode) {
 			case D:
@@ -301,23 +307,23 @@ public class FlatFilePartitioner implements Partitioner {
 		}
 	}
 
-	public void setJobName(final String jobName) {
+	public void setJobName(String jobName) {
 		this.jobName = jobName;
 	}
 
-	public void setDatabaseCode(final String databaseCode) {
+	public void setDatabaseCode(String databaseCode) {
 		this.databaseCode = databaseCode;
 	}
 
-	public void setEncoding(final String encoding) {
+	public void setEncoding(String encoding) {
 		this.encoding = encoding;
 	}
 
-	public void setDelimiterCharacter(final String delimiterCharacter) {
+	public void setDelimiterCharacter(String delimiterCharacter) {
 		this.delimiterCharacter = delimiterCharacter;
 	}
 
-	public void setMappingName(final String mappingName) {
+	public void setMappingName(String mappingName) {
 		this.mappingName = mappingName;
 	}
 

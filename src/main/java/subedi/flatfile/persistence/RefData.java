@@ -8,6 +8,9 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 /**
+ * Hibernate object to map the reference values for a job. The table holds the name differences
+ * of file and the database's column names if there any
+ * 
  * @author vivek.subedi
  *
  */

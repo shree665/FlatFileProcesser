@@ -6,6 +6,8 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 /**
+ * Composite primary key for each record to map by hibernate
+ * 
  * @author vivek.subedi
  *
  */

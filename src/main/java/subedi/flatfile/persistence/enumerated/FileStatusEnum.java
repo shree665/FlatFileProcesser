@@ -1,5 +1,9 @@
 package subedi.flatfile.persistence.enumerated;
-
+/**
+ * 
+ * @author vivek.subedi
+ *
+ */
 public enum FileStatusEnum {
 
 	/** The processed File. */

@@ -7,6 +7,8 @@ import javax.persistence.Embeddable;
 
 /**
  * Composite primary key consisting of table name, schema, and column name
+ * 
+ * @author vivek.subedi
  */
 @Embeddable
 public class OracleSystemColumnId implements Serializable {

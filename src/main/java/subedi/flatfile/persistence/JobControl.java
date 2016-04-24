@@ -13,6 +13,8 @@ import subedi.flatfile.persistence.enumerated.BehaviorEnum;
 import subedi.flatfile.persistence.enumerated.FrequencyEnum;
 
 /**
+ * Hibernate object to map the job_ctrl table. Job_ctrl table is a configuration table 
+ * so that we can control job
  * 
  * @author vivek.subedi
  *

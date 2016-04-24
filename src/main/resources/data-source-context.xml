@@ -35,7 +35,7 @@
     <bean id="dataSource2" class="org.apache.commons.dbcp2.BasicDataSource" >
        <property name="driverClassName" value="${batch.oracle.tds.driver}" />
        <property name="url" value="${batch.oracle.tds.url}" />
-	   <property name="username" value="${batch.oracle.tds.user}" />
+	   <property name="username" value="${batch.oracle.tds.username}" />
 	   <property name="password" value="${batch.oracle.tds.password}" />
        <property name="poolPreparedStatements" value="${batch.oracle.tds.pool.prepared.statements}" />
        <property name="maxIdle" value="${batch.oracle.tds.max.idle.connections}" />                 

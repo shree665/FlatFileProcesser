@@ -15,6 +15,11 @@ import subedi.flatfile.persistence.enumerated.FileTypeEnum;
 import subedi.flatfile.util.FlatFileUtil;
 
 /**
+ * Listener to move files from /staging directory to /working directory to process. 
+ * After the process, files move to /archive directory. If there is any processing errors, file
+ * will stay on the working directory and will be process on next job run by moving file from /working
+ * directory to /staging directory
+ * 
  * @author vivek.subedi
  *
  */
@@ -26,11 +31,10 @@ public class FlatFileMoveListener implements StepExecutionListener {
 	private FileTypeEnum fileType;
 	
 	/**
-	 * Moves/compresses files to archive location after a they have
-	 * been processed
+	 * Moves/compresses files to archive location after a they have been processed
 	 */
 	@Override
-	public ExitStatus afterStep(final StepExecution stepExecution) {
+	public ExitStatus afterStep(StepExecution stepExecution) {
 		
 		//need to get folder path from database so that easy to update if necessary
 		String archiveFolderPath = FlatFileUtil.ARCHIVE_PATH;
@@ -50,7 +54,7 @@ public class FlatFileMoveListener implements StepExecutionListener {
 			}
 			
 			//moving file to archive
-			File workingFile = new File(workingFilePath);
+			File workingFile = new File(workingFilePath.replaceFirst(FlatFileUtil.FILE_PREFIX, ""));
 			String archiveFilePath = FlatFileUtil.archive(workingFile, archiveFolder, fileType.toString(), true);
 			logger.info("File has been archived to [{}]", archiveFilePath);
 		}
@@ -63,7 +67,7 @@ public class FlatFileMoveListener implements StepExecutionListener {
 	 * in the StepExecution context and FileTxn
 	 */
 	@Override
-	public void beforeStep(final StepExecution stepExecution) {
+	public void beforeStep(StepExecution stepExecution) {
 		
 		// Get relevant fileTxnId
 		String stagingFolderPath = stepExecution.getExecutionContext().getString(FlatFileUtil.FILE_NAME_KEY);;
