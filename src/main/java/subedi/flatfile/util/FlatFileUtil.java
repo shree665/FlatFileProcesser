@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 /**
+ * Utility class
  * 
  * @author vivek.subedi
  *
@@ -38,7 +39,7 @@ public class FlatFileUtil {
 	private static Logger logger = LoggerFactory.getLogger(FlatFileUtil.class);
 	
 	//Cisco Constants
-	public static final String DB2_ICM_TABLE_PREFIX = "CCM_ICM_";
+	public static final String ORACLE_ICM_TABLE_PREFIX = "CCM_ICM_";
 	public static final String ICM_DATABASECODE = "ICM";
 	private static final String YEAR = "$YEAR";
 	private static final String MONTH = "$MONTH";
@@ -206,7 +207,7 @@ public class FlatFileUtil {
 	public static String replaceCcmPrefixToTableName(final String tableName, final String databaseCode) {
 		String replacedTableName = null;
 		if (databaseCode.equalsIgnoreCase(ICM_DATABASECODE)) {
-			replacedTableName = tableName.replace(DB2_ICM_TABLE_PREFIX, "");
+			replacedTableName = tableName.replace(ORACLE_ICM_TABLE_PREFIX, "");
 		}
 		return replacedTableName;
 	}

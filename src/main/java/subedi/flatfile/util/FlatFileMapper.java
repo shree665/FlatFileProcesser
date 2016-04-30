@@ -17,6 +17,8 @@ import subedi.flatfile.persistence.JobControl;
 import subedi.flatfile.service.JobCtrlService;
 
 /**
+ * Mapper to map the each record of a file.
+ * 
  * @author vivek.subedi
  * @param <T>
  *

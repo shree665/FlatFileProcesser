@@ -80,7 +80,7 @@ public class CustomSqlParameterSourceProvider implements ItemSqlParameterSourceP
 	private void setMetaData(JobControl jobControl) {
 		
 		//retrieving db2TableName using jobControl and adding prefix and suffix into it
-		String db2TableName = FlatFileUtil.DB2_ICM_TABLE_PREFIX + jobControl.getTableName();
+		String db2TableName = FlatFileUtil.ORACLE_ICM_TABLE_PREFIX + jobControl.getTableName();
 		
 		//getting column meta data so that we can have column type and its length
 		List<OracleSystemColumn> columnMetaData = oracleSystemColumnService.getOracleColumnsForTable(schema, db2TableName);
@@ -130,7 +130,7 @@ public class CustomSqlParameterSourceProvider implements ItemSqlParameterSourceP
 		List<RefData> myRefDatas = refDataService.getRefDataForDatabase(mappingName);
 		Map<String, String> columnMap = new HashMap<String, String>();
 		for (RefData refData : myRefDatas) {
-			if (refData.getDb2TableName().equalsIgnoreCase(FlatFileUtil.DB2_ICM_TABLE_PREFIX+item.getJobControl().getTableName())) {
+			if (refData.getDb2TableName().equalsIgnoreCase(FlatFileUtil.ORACLE_ICM_TABLE_PREFIX+item.getJobControl().getTableName())) {
 				columnMap.put(refData.getId().getColumnNameFromFile(), refData.getDb2ColumnName());
 			}
 		}

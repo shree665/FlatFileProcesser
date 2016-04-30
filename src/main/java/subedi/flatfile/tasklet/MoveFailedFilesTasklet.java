@@ -14,6 +14,8 @@ import org.springframework.batch.repeat.RepeatStatus;
 import subedi.flatfile.util.FlatFileUtil;
 
 /**
+ * Tasklet to move failed files from /working directory to /staging directory to process again if the
+ * file was not process on /working directory for some reason
  * 
  * @author vivek.subedi
  *

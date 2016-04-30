@@ -10,6 +10,8 @@ import subedi.flatfile.persistence.enumerated.FileStatusEnum;
 import subedi.flatfile.persistence.enumerated.FileTypeEnum;
 
 /**
+ * Service to retrieve file properties that need to process by this job
+ * 
  * @author vivek.subedi
  *
  */
@@ -23,7 +25,7 @@ public interface UploadedFileRecordService {
 	 * @param fileCat -  the category of file i.e TELEPHONY_ANALYTICS
 	 * @return the list of uploaded files
 	 */
-	public abstract List<UploadedFileRecord> getUploadedFiles(FileStatusEnum fileStat, FileTypeEnum fileType, String fileCat);
+	List<UploadedFileRecord> getUploadedFiles(FileStatusEnum fileStat, FileTypeEnum fileType, String fileCat);
 
 	/**
 	 * Update the status of a file using it's ID.
@@ -31,12 +33,12 @@ public interface UploadedFileRecordService {
 	 * @param uploadedFileId - the uploaded file id
 	 * @param status the status of a file
 	 */
-	public abstract void updateUploadedFileRecord(Long uploadedFileId, FileStatusEnum status);
+	void updateUploadedFileRecord(Long uploadedFileId, FileStatusEnum status);
 	
 	/**
 	 * @param uploadedFileRecordStatus - status of the file
 	 * @return booelan
 	 */
-	public abstract boolean moreFilesLeftToProcess(FileStatusEnum uploadedFileRecordStatus);
+	boolean moreFilesLeftToProcess(FileStatusEnum uploadedFileRecordStatus);
 	
 }

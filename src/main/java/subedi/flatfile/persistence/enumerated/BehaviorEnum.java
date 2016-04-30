@@ -1,6 +1,7 @@
 package subedi.flatfile.persistence.enumerated;
 
 /**
+ * Enum class to hold the behavior of a table
  * 
  * @author vivek.subedi
  *

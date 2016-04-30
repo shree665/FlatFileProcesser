@@ -196,7 +196,7 @@ public class FlatFilePartitioner implements Partitioner {
 		String fileTableName = FlatFileUtil.retrieveTableNameFromFile(uploadedFileName);
 		String db2TableName = fileToDB2tableMap.get(fileTableName);
 
-		//clearing CCM_ICM_ from mapped db2 table name because to match with jobContrl's table name
+		//clearing prefix of a table from mapped oracle table name because to match with jobContrl's table name
 		String tableName = FlatFileUtil.replaceCcmPrefixToTableName(db2TableName, databaseCode);
 		JobControl jobControl = jobCtrlService.getJobControlForTable(jobName, databaseCode, tableName);
 
@@ -260,21 +260,21 @@ public class FlatFilePartitioner implements Partitioner {
 
 
 	/**
-	 * Filter files to be processed by checking the active etl from the uploaded files.
+	 * Filter files to be processed by checking the active ETL from the uploaded files.
 	 *
 	 * @param files - collection of files
-	 * @param fileToDB2tableMap - mapping from ref_data table
+	 * @param fileToOracle2tableMap - mapping from ref_data table
 	 * @return the list of files that needs to be processed
 	 */
-	private List<File> filterFilesToBeProcessed(Collection<File> files, Map<String, String> fileToDB2tableMap) {
+	private List<File> filterFilesToBeProcessed(Collection<File> files, Map<String, String> fileToOracletableMap) {
 
 		//List of file records that will actually be processed
 		List<File> toBeProcessedFileRecords = new ArrayList<File>();
 		//checking each uploaded file for the ETL. If ETL is active we use that file
 		for (File file : files) {
 
-			//jobControl to check the etl status
-			JobControl jobControl = getJobControlForTable(file.getName(), fileToDB2tableMap);
+			//jobControl to check the ETL status
+			JobControl jobControl = getJobControlForTable(file.getName(), fileToOracletableMap);
 
 			//controlled by frequency code
 			final boolean activateETL = determineIfEtlActive(jobControl.getFrequencyCode());
@@ -287,7 +287,7 @@ public class FlatFilePartitioner implements Partitioner {
 	}
 
 	/**
-	 * Determine if etl active or not.
+	 * Determine if ETL active or not.
 	 *
 	 * @param frequencyCode the frequency code
 	 * @return true, if successful
@@ -302,7 +302,7 @@ public class FlatFilePartitioner implements Partitioner {
 			case N:
 				return false;
 			default:
-			logger.info("Unknown frequency code [" + frequencyCode + "]");
+				logger.info("Unknown frequency code [" + frequencyCode + "]");
 				throw new IllegalArgumentException("Unknown frequency code ["+frequencyCode+"]");
 		}
 	}

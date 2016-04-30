@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 
 
 /**
+ * Class to cast all the file values to the oracle specific data type
+ * 
  * @author vivek.subedi
  *
  */

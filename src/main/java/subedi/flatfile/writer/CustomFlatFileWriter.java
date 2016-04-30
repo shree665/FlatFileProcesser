@@ -23,6 +23,8 @@ import subedi.flatfile.service.RefDataService;
 import subedi.flatfile.util.FlatFileUtil;
 
 /**
+ * Writer to write data to the database using jdbcbatchitemwriter using sqlparamtersourceprovider
+ * 
  * @author vivek.subedi
  *
  */
@@ -97,7 +99,7 @@ public class CustomFlatFileWriter extends JdbcBatchItemWriter<DataContainer> imp
 		jobControl = jobCtrlService.getJobControl(jobControlId);
 
 		String sql = null;
-		String db2TableName = FlatFileUtil.DB2_ICM_TABLE_PREFIX+jobControl.getTableName();
+		String db2TableName = FlatFileUtil.ORACLE_ICM_TABLE_PREFIX+jobControl.getTableName();
 
 		//Getting refData to map
 		List<RefData> allRefDatas = refDataService.getRefDataForDatabase(mappingName);

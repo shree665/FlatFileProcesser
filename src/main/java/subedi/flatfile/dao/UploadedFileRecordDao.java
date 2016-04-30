@@ -30,7 +30,7 @@ public interface UploadedFileRecordDao {
 	/**
 	 * Method to update the status of the file in the database once the file has been copied to server
 	 * 
-	 * @param fileRecord - fileupload object to update the status
+	 * @param fileRecord - file upload object to update the status
 	 */
 	void updateUploadedFileRecord(UploadedFileRecord fileRecord);
 	

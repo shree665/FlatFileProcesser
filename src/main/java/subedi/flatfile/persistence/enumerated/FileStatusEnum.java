@@ -1,5 +1,6 @@
 package subedi.flatfile.persistence.enumerated;
 /**
+ * Enum class to hold the process status of a file
  * 
  * @author vivek.subedi
  *

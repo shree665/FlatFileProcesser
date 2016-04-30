@@ -4,6 +4,7 @@ import java.util.List;
 
 import subedi.flatfile.persistence.JobControl;
 /**
+ * Job control service to do business logic after retrieving the object from database
  * 
  * @author vivek.subedi
  *
@@ -22,18 +23,18 @@ public interface JobCtrlService {
 	/**
 	 * Method to return a specific JobControl object from cache using job control id
 	 * 
-	 * @param jobControlId
-	 * @return
+	 * @param jobControlId - job control id
+	 * @return a job control object
 	 */
 	JobControl getJobControl(Integer jobControlId);
 	
 	/**
 	 * Method to retrieve a JobControl object from a cache list using tablename
 	 * 
-	 * @param jobName
-	 * @param databaseCode
-	 * @param tableName
-	 * @return
+	 * @param jobName - job name 
+	 * @param databaseCode - database code 
+	 * @param tableName - table name 
+	 * @return a job control object
 	 */
 	JobControl getJobControlForTable(String jobName, String databaseCode, String tableName);
 }

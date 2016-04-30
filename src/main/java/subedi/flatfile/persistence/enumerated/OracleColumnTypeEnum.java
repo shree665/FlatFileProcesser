@@ -3,6 +3,7 @@ package subedi.flatfile.persistence.enumerated;
 import java.sql.Types;
 
 /**
+ * Enum to hold the data type of a oracle column.
  * 
  * @author vivek.subedi
  *

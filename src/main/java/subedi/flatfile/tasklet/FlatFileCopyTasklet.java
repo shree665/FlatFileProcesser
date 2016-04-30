@@ -20,6 +20,7 @@ import subedi.flatfile.util.FlatFileUtil;
 
 
 /**
+ * Tasklet to move file from /staging directory to /working directory to read and process the file.
  * 
  * @author vivek.subedi
  *
@@ -114,8 +115,7 @@ public class FlatFileCopyTasklet implements Tasklet {
 		this.uploadedFileRecordType = uploadedFileRecordType;
 	}
 
-	public void setUploadedFileRecordCategory(
-			final String uploadedFileRecordCategory) {
+	public void setUploadedFileRecordCategory(String uploadedFileRecordCategory) {
 		this.uploadedFileRecordCategory = uploadedFileRecordCategory;
 	}
 }

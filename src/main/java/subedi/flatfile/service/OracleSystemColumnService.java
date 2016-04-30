@@ -5,6 +5,7 @@ import java.util.List;
 
 import subedi.flatfile.persistence.OracleSystemColumn;
 /**
+ * Service to process and cache the oracle system columns for specific table
  * 
  * @author vivek.subedi
  *

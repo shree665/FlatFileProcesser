@@ -1,6 +1,7 @@
 package subedi.flatfile.persistence.enumerated;
 
 /**
+ * Enum to hold the final status of a table
  * 
  * @author vivek.subedi
  *
