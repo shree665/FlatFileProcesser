@@ -27,7 +27,7 @@ import subedi.flatfile.util.FlatFileUtil;
 import subedi.flatfile.util.OracleCaster;
 
 /**
- * provides values of an item to the SQL at runtime.
+ * Provides values of an item to the SQL at runtime.
  *
  * @author vivek.subedi
  */

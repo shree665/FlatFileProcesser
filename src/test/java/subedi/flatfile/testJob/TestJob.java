@@ -1,4 +1,4 @@
-package testJob;
+package subedi.flatfile.testJob;
 
 import static org.junit.Assert.assertEquals;
 
@@ -28,9 +28,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  *
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {
-	    "classpath:SUBEDIFILE_J01-context.xml",
-	    "classpath:test-context.xml"})
+@ContextConfiguration(locations = {"classpath:SUBEDIFILE_J01-context.xml", "classpath:test-context.xml"})
 public class TestJob {
 	
 	@Value("${batch.schema}")
