@@ -99,10 +99,6 @@
 			<artifactId>spring-aop</artifactId>
 			<version>4.2.5.RELEASE</version>
 		</dependency>
-		
-		
-		
-		
 	
 	<!-- apache data source -->
 		<dependency>
@@ -266,7 +262,5 @@
 			<artifactId>spring-batch-test</artifactId>
 			<version>3.0.6.RELEASE</version>
 		</dependency>
-		
-	    
   </dependencies>
 </project>
