@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<jdbc:initialize-database data-source="dataSource"
+		enabled="${test.database.hsqldb.initialization.enabled:true}"
+		ignore-failures="NONE">
+
+		<jdbc:script
+			location="classpath:/database/hsqldb/initialization/batch-common/reset.sql" />
+		<jdbc:script
+			location="classpath:/database/hsqldb/initialization/batch-common/create-schema.sql" />
+		<jdbc:script
+			location="classpath:/database/hsqldb/initialization/batch-common/create-tables-springbatch.sql" />
+		<jdbc:script
+			location="classpath:/database/hsqldb/initialization/batch-common/create-tables-joblaunch.sql" />
+		<jdbc:script
+			location="classpath:/database/hsqldb/initialization/batch-common/createTable.sql" />
+		<jdbc:script
+			location="classpath:/database/hsqldb/initialization/batch-common/insert-params.sql" />
+	
+
+		<!-- ADD PROJECT SPECIFIC SCRIPTS HERE -->
+		
+	</jdbc:initialize-database>
+	
+	
+	<jdbc:initialize-database data-source="dataSource2"
+		enabled="${test.database.hsqldb.initialization.enabled:true}"
+		ignore-failures="NONE">
+
+		<jdbc:script
+			location="classpath:/database/hsqldb/initialization/batch-common/reset.sql" />
+		<jdbc:script
+			location="classpath:/database/hsqldb/initialization/batch-common/create-schemas.sql" />
+		<jdbc:script
+			location="classpath:/database/hsqldb/initialization/batch-common/create-tables-springbatch.sql" />
+		<jdbc:script
+			location="classpath:/database/hsqldb/initialization/batch-common/create-tables-joblaunch.sql" />
+		<jdbc:script
+			location="classpath:/database/hsqldb/initialization/batch-common/create-tables-common.sql" />
+		<jdbc:script
+			location="classpath:/database/hsqldb/initialization/batch-common/insert-params.sql" />
+	
+		<!-- ADD PROJECT SPECIFIC SCRIPTS HERE -->
+	
+	</jdbc:initialize-database>
+
+
+</beans>

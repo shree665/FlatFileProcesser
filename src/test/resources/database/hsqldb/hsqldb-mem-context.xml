@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<jdbc:embedded-database id="dataSource" type="HSQL" />
+	<jdbc:embedded-database id="dataSource2" type="HSQL" />
+
+	<!-- Faster transaction manager for JUnits -->
+	<!-- TODO Evaluate performance advantage of this mgr, and if we want to 
+		use it. (Does it commit every query?) -->
+	<!-- <bean id="transactionManager"
+		class="org.springframework.batch.support.transaction.ResourcelessTransactionManager" />
+ -->
+</beans>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	<!-- Import dataSource bean -->
+	<import resource="hsqldb-${test.database.hsqldb.environment:mem}-context.xml" />
+	
+	<!-- Commented out because database in initialized before job context is called in 
+	Test Context files to deal with ConfigurationService autowiring issue -->
+	
+	<!-- Initialize common scripts -->
+ 	<import resource="initialization/initialization-context.xml"/>
+	
+	<!-- Initialize localhost vs. in-memory specific scripts -->
+	<import resource="initialization/initialization-${test.database.hsqldb.environment:mem}-context.xml"/>
+	
+	<!-- HSQLDB-specific incrementer for sequences -->
+	<bean id="incrementerParent" class="org.springframework.jdbc.support.incrementer.HsqlSequenceMaxValueIncrementer">
+		<property name="dataSource" ref="dataSource" />
+		<property name="incrementerName" value="ID" />
+	</bean>
+	
+</beans>

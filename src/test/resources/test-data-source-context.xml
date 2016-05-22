@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- Specify the test database to use (HSQLDB, H2, etc.)-->
+	<import resource="database/hsqldb/hsqldb-context.xml" />
+	
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate"><!--  added 4-24-2014 dataSource inherent to JdbcTemplate class, needed to run localhost-->
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- This may override data-source-context bean definition, need TA because subseq txn tables are going to be read from TA-->
+	<bean id="defaultSchema" class="java.lang.String">
+		<constructor-arg value="${batch.tds.schema}"/><!--Defined in batch-hsqldb.properties -->
+	</bean>
+	
+	
+	
+</beans>
+
+
+
