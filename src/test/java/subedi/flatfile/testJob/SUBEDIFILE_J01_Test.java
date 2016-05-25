@@ -25,7 +25,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
-public class CCMICMETLED_J01_Test {
+public class SUBEDIFILE_J01_Test {
 
 	static {
 		System.setProperty("test.database.hsqldb.environment", "mem");
