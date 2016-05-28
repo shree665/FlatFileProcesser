@@ -16,6 +16,7 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -79,7 +80,6 @@ public class SUBEDIFILE_J01_Test {
 		final JobParameters jobParameters = new JobParameters(jobParametersContent);
 
 		// launch
-
 		JobExecution jobExecution = null;
 		jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 
@@ -94,10 +94,8 @@ public class SUBEDIFILE_J01_Test {
 	 */
 	@Test
 	public void testDbEntries() throws IOException {
-
 		// Assert completed
 		assertEquals(ExitStatus.COMPLETED, stat);
-
 	}
 
 	/**
