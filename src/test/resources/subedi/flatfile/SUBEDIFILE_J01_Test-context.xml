@@ -8,4 +8,6 @@
 		<import resource="classpath:/test-data-source-context.xml" />
 		<import resource="classpath:/SUBEDIFILE_J01-context.xml" />
 		
+		<bean id="jobLauncherTestUtils" class="org.springframework.batch.test.JobLauncherTestUtils" />
+		
 </beans>

@@ -16,24 +16,28 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-/**
- * Test Case for the CCMICMETLED_J01 job
- */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
-public class SUBEDIFILE_J01_Test {
+import subedi.flatfile.test.support.*;
 
-	static {
-		System.setProperty("test.database.hsqldb.environment", "mem");
-	}
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(initializers = { TestEnvironmentInitializer.class },
+		locations = { "classpath:subedi/flatfile/SUBEDIFILE_J01_Test-context.xml" })
+@DirtiesContext
+public class SUBEDIFILE_J01_Test {
+	
+	//private final String JOB_LAUNCH_NAME = "SUBEDIFILE_J01";
+
+	private static final String INPUT_FILE = "src/test/input/inst1_awdb.dbo.Agent.20160413.041022.3510025";
 
 	@Autowired
 	private JobLauncherTestUtils jobLauncherTestUtils;
+	
+	private JobExecution jobExecution = null;
+	private JobParameters jobParameters = null;
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
@@ -57,6 +61,7 @@ public class SUBEDIFILE_J01_Test {
 	 *
 	 * @throws Exception
 	 */
+	
 	@Before
 	public void setUp() throws Exception {
 
@@ -77,23 +82,22 @@ public class SUBEDIFILE_J01_Test {
 		jobParametersContent.put("PROCESS.FAILED", new JobParameter(PROCESS_FAILED));
 		jobParametersContent.put("MAX.RUN.COUNT", new JobParameter(MAX_RUN_COUNT));
 
-		final JobParameters jobParameters = new JobParameters(jobParametersContent);
-
-		// launch
-		JobExecution jobExecution = null;
-		jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
-
-		stat = jobExecution.getExitStatus();
+		jobParameters = new JobParameters(jobParametersContent);
 
 	}
 
 	/**
 	 * Assures the expected amount of DB entries exist after the step is complete
-	 *
-	 * @throws IOException
+	 * @throws Exception 
 	 */
 	@Test
-	public void testDbEntries() throws IOException {
+	public void testDbEntries() throws Exception {
+		// launch
+		jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
+		stat = jobExecution.getExitStatus();
+		
+		DataQueryUtils.printSQLQuery(jdbcTemplate, "SELECT * FROM CCM_ICM_AGNT");
+		
 		// Assert completed
 		assertEquals(ExitStatus.COMPLETED, stat);
 	}
@@ -106,6 +110,8 @@ public class SUBEDIFILE_J01_Test {
 	@After
 	public void tearDown() throws IOException {
 		jobLauncherTestUtils = null;
+		jobExecution = null;
+		jobParameters = null;
 	}
 
 }
