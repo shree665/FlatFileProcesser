@@ -2,10 +2,12 @@ package subedi.flatfile.testJob;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,6 +43,9 @@ public class SUBEDIFILE_J01_Test {
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
+	
+	@Autowired
+	private TemporaryFolderBean tempFolderBean;
 
 	private ExitStatus stat;
 
@@ -91,7 +96,11 @@ public class SUBEDIFILE_J01_Test {
 	 * @throws Exception 
 	 */
 	@Test
-	public void testDbEntries() throws Exception {
+	public void testJob() throws Exception {
+		File tempStaging = tempFolderBean.getStagingDirectory();
+		FileUtils.copyFileToDirectory(new File(INPUT_FILE), tempStaging);
+		String rootPath = tempFolderBean.getCanonicalPath();
+		System.out.println("You can find the temp files here: " + rootPath);
 		// launch
 		jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
 		stat = jobExecution.getExitStatus();
