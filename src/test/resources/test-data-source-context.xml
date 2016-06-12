@@ -6,7 +6,7 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 	<!-- Specify the test database to use (HSQLDB, H2, etc.)-->
-	<import resource="database/hsqldb/hsqldb-context.xml" />
+	<import resource="classpath:/database/hsqldb/hsqldb-context.xml" />
 	
 	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate"><!--  added 4-24-2014 dataSource inherent to JdbcTemplate class, needed to run localhost-->
 		<property name="dataSource" ref="dataSource" />
@@ -16,9 +16,6 @@
 	<bean id="defaultSchema" class="java.lang.String">
 		<constructor-arg value="${batch.tds.schema}"/><!--Defined in batch-hsqldb.properties -->
 	</bean>
-	
-	
-	
 </beans>
 
 
